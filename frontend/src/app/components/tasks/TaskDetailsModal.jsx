@@ -1,16 +1,39 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 
-const TaskDetailsModal = ({ isOpen, task, onClose, onSave, isEditing = false }) => {
+const TaskDetailsModal = ({ isOpen, task, onClose, onSave, isEditing = false, teams = [], users = [] }) => {
   const [formData, setFormData] = useState(
-    task || { title: '', description: '', status: 'TODO', assignedToId: null }
+    task || { title: '', description: '', status: 'TODO', assignedToId: null, teamId: null }
   );
+  const [assignmentType, setAssignmentType] = useState('person');
+
+  useEffect(() => {
+    if (task) {
+      setFormData(task);
+      setAssignmentType(task.teamId ? 'team' : 'person');
+    } else {
+      setFormData({ title: '', description: '', status: 'TODO', assignedToId: null, teamId: null });
+      setAssignmentType('person');
+    }
+  }, [task, isOpen]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: value,
+      // Clear the other assignment type when changing
+      ...(name === 'assignedToId' && { teamId: null }),
+      ...(name === 'teamId' && { assignedToId: null })
+    }));
+  };
+
+  const handleAssignmentTypeChange = (type) => {
+    setAssignmentType(type);
+    setFormData(prev => ({
+      ...prev,
+      assignedToId: type === 'person' ? null : prev.assignedToId,
+      teamId: type === 'team' ? null : prev.teamId
     }));
   };
 
@@ -23,8 +46,8 @@ const TaskDetailsModal = ({ isOpen, task, onClose, onSave, isEditing = false }) 
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-lg max-w-md w-full">
-        <div className="flex justify-between items-center p-6 border-b border-gray-200">
+      <div className="bg-white rounded-lg shadow-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
+        <div className="flex justify-between items-center p-6 border-b border-gray-200 sticky top-0 bg-white">
           <h2 className="text-lg font-semibold text-gray-900">
             {isEditing ? 'Edit Task' : 'Create Task'}
           </h2>
@@ -81,7 +104,67 @@ const TaskDetailsModal = ({ isOpen, task, onClose, onSave, isEditing = false }) 
             </select>
           </div>
 
-          <div className="flex gap-3 pt-4">
+          <div className="border-t pt-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Assign To
+            </label>
+            <div className="flex gap-2 mb-3">
+              <button
+                type="button"
+                onClick={() => handleAssignmentTypeChange('person')}
+                className={`px-3 py-2 rounded-lg text-sm font-medium transition ${
+                  assignmentType === 'person'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                Person
+              </button>
+              <button
+                type="button"
+                onClick={() => handleAssignmentTypeChange('team')}
+                className={`px-3 py-2 rounded-lg text-sm font-medium transition ${
+                  assignmentType === 'team'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                Team
+              </button>
+            </div>
+
+            {assignmentType === 'person' ? (
+              <select
+                name="assignedToId"
+                value={formData.assignedToId || ''}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="">Select a person (optional)</option>
+                {users.map(user => (
+                  <option key={user.id} value={user.id}>
+                    {user.name} ({user.email})
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <select
+                name="teamId"
+                value={formData.teamId || ''}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="">Select a team (optional)</option>
+                {teams.map(team => (
+                  <option key={team.id} value={team.id}>
+                    {team.name}
+                  </option>
+                ))}
+              </select>
+            )}
+          </div>
+
+          <div className="flex gap-3 pt-4 border-t">
             <button
               type="button"
               onClick={onClose}

@@ -6,18 +6,107 @@ datasource db {
   provider = "postgresql"
 }
 
+// users tables
 model User {
-  id        Int      @id @default(autoincrement())
+  id    Int      @id @default(autoincrement())
   name      String
   email     String   @unique
   password  String
   role      Role     @default(USER)
+
+  // task and teams Relations
+  teamsOwned    Team[]    @relation("TeamOwner")
+  teamMembers   TeamMember[]
+  tasksAssigned Task[]    @relation("TaskAssignee")
+  tasksCreated  Task[]    @relation("TaskCreator")
+  comments      Comment[]
+  activityLogs  ActivityLog[]
+
   createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
+  updatedAt DateTime @updatedAt
+}
+//team table
+model Team {
+  id        Int       @id @default(autoincrement())
+  name      String
+  description String?
+  ownerId   Int
+  owner     User      @relation("TeamOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  members   TeamMember[]
+  tasks     Task[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+//members of teams
+model TeamMember {
+  id        Int       @id @default(autoincrement())
+  teamId    Int
+  team      Team      @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  userId    Int
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([teamId, userId])
+}
+//task tables
+model Task {
+  id          Int       @id @default(autoincrement())
+  title       String
+  description String?
+  status      TaskStatus @default(TODO)
+  teamId      Int?
+  team        Team?     @relation(fields: [teamId], references: [id], onDelete: SetNull)
+  createdById Int
+  createdBy   User      @relation("TaskCreator", fields: [createdById], references: [id], onDelete: Cascade)
+  assignedToId Int?
+  assignedTo  User?     @relation("TaskAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
+  comments    Comment[]
+  activityLogs ActivityLog[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+//comments
+model Comment {
+  id        Int       @id @default(autoincrement())
+  content   String
+  taskId    Int
+  task      Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  userId    Int
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  activityLogs ActivityLog[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+//the activityLogs
+model ActivityLog {
+  id          Int       @id @default(autoincrement())
+  action      String    // e.g., "USER_CREATED", "TASK_ASSIGNED", "TASK_COMPLETED", "COMMENT_ADDED", "ROLE_CHANGED"
+  description String?
+  userId      Int
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  taskId      Int?
+  task        Task?     @relation(fields: [taskId], references: [id], onDelete: SetNull)
+  commentId   Int?
+  comment     Comment?  @relation(fields: [commentId], references: [id], onDelete: SetNull)
+  
+  // Metadata for log details
+  metadata    Json?     // Store additional info like old/new values for edits
+  
+  createdAt   DateTime @default(now())
 }
 
 enum Role {
   USER
   MANAGER
   ADMIN
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  DONE
 }

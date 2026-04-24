@@ -62,8 +62,82 @@ export class AuthService {
         const prisma = this.prisma as any;
         const user = await prisma.user.findUnique({
             where: { id: userId },
-            select: { id: true, name: true, email: true, role: true }
+            select: { id: true, name: true, email: true, role: true, createdAt: true }
         });
         return { user };
+    }
+
+    async updateProfile(userId: number, updateData: any) {
+        const prisma = this.prisma as any;
+        
+        const data: any = {};
+        if (updateData.name) data.name = updateData.name;
+        if (updateData.email) data.email = updateData.email;
+        
+        if (updateData.newPassword) {
+            // Verify current password
+            const user = await prisma.user.findUnique({ where: { id: userId } });
+            const isValid = await bcrypt.compare(updateData.currentPassword, user.password);
+            if (!isValid) throw new UnauthorizedException("Current password is incorrect");
+            
+            data.password = await bcrypt.hash(updateData.newPassword, 10);
+        }
+
+        const updatedUser = await prisma.user.update({
+            where: { id: userId },
+            data,
+            select: { id: true, name: true, email: true, role: true }
+        });
+        return { user: updatedUser };
+    }
+
+    async getUserById(userId: number) {
+        const prisma = this.prisma as any;
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+            select: { id: true, name: true, email: true, role: true }
+        });
+        return user;
+    }
+
+    async getAllUsers() {
+        const prisma = this.prisma as any;
+        const users = await prisma.user.findMany({
+            select: { id: true, name: true, email: true, role: true, createdAt: true }
+        });
+        return users;
+    }
+
+    async updateUserRole(userId: number, newRole: string) {
+        const prisma = this.prisma as any;
+        const updatedUser = await prisma.user.update({
+            where: { id: userId },
+            data: { role: newRole },
+            select: { id: true, name: true, email: true, role: true }
+        });
+        return updatedUser;
+    }
+
+    async deleteUser(userId: number) {
+        const prisma = this.prisma as any;
+        await prisma.user.delete({
+            where: { id: userId },
+        });
+        return { message: "User deleted successfully" };
+    }
+
+    async addUser(name: string, email: string, password: string, role: string) {
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const prisma = this.prisma as any;
+        const newUser = await prisma.user.create({
+            data: {
+                name,
+                email,
+                password: hashedPassword,
+                role,
+            },
+            select: { id: true, name: true, email: true, role: true }
+        });
+        return newUser;
     }
 }
