@@ -5,13 +5,16 @@ import { useAuth } from "../../context/AuthContext";
 
 // role → Route mapping
 const getDashboardRoute = (role) => {
-  switch (role) {
+  const normalizedRole = role?.toLowerCase();
+  switch (normalizedRole) {
     case "admin":
-      return "/admin";
+      return "/dashboard/admin";
     case "manager":
-      return "/manager";
+      return "/dashboard/manager";
+    case "user":
+      return "/dashboard/member";
     default:
-      return "/dashboard";
+      return "/dashboard/member";
   }
 };
 

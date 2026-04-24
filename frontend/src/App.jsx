@@ -7,22 +7,32 @@ import ProtectedRoutes from "./app/routes/ProtectedRoutes";
 import AdminDashboard from "./app/pages/dashboards/AdminDashboard";
 import ManagerDashboard from "./app/pages/dashboards/ManagerDashboard";
 import MemberDashboard from "./app/pages/dashboards/MemberDashboard";
+import { UserProfile } from "./app/pages/dashboards/UserProfile";
 
 
 function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <Header />
+        
 
         <Routes>
          
           <Route path="/" element={<AuthPage />} />
 
+          {/* User Profile Route */}
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoutes>
+                <UserProfile />
+              </ProtectedRoutes>
+            }
+          />
 
           {/* protected routes */}
           <Route
-            path="/admin"
+            path="/dashboard/admin"
             element={
               <ProtectedRoutes>
                 <AdminDashboard />
@@ -30,7 +40,7 @@ function App() {
             }
           />
           <Route
-            path="/manager"
+            path="/dashboard/manager"
             element={
               <ProtectedRoutes>
                 <ManagerDashboard />
@@ -38,7 +48,7 @@ function App() {
             }
           />
           <Route
-            path="/member"
+            path="/dashboard/member"
             element={
               <ProtectedRoutes>
                 <MemberDashboard />
@@ -53,6 +63,7 @@ function App() {
               </ProtectedRoutes>
             }
           />
+          <Route path="*" element={<AuthPage />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
