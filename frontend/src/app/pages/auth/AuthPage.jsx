@@ -7,11 +7,11 @@ import { useAuth } from "../../context/AuthContext";
 const getDashboardRoute = (role) => {
   switch (role) {
     case "admin":
-      return "/admin";
+      return "/dashboard/admin";
     case "manager":
-      return "/manager";
+      return "/dashboard/manager";
     default:
-      return "/dashboard";
+      return "/dashboard/member";
   }
 };
 
