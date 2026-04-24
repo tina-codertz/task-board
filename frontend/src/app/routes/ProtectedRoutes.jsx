@@ -10,11 +10,11 @@ export default function ProtectedRoutes({children, roles}){
     if (loading) return <p>Loading...</p>;
     if (!user){
         //then the user is not login therefore go to login page
-        return<Navigate to="/auth"/>;
+        return<Navigate to="/"/>;
     }
     if(roles && !roles.includes(user.role)){
         //then you have logged in but with the wrong role redirect to login again
-        return <Navigate to="/auth"/>
+        return <Navigate to="/"/>
     }
 
 

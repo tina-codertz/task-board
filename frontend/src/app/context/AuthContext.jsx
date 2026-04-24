@@ -1,14 +1,13 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 
 const AuthContext = createContext();
-
 const API_URL = import.meta.env.VITE_API_URL;
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  //  Load user on app start (verify token)
+  // Load user on app start
   useEffect(() => {
     const initAuth = async () => {
       const token = localStorage.getItem("token");
@@ -28,7 +27,7 @@ export function AuthProvider({ children }) {
         if (!res.ok) throw new Error("Invalid token");
 
         const data = await res.json();
-        setUser(data);
+        setUser(data.user); 
       } catch (err) {
         console.error("Auth check failed:", err);
         logout();
@@ -40,12 +39,13 @@ export function AuthProvider({ children }) {
     initAuth();
   }, []);
 
-  //  Save user + token
+  //saving the user data and token to the state and localStorage respectively
   const saveAuth = (userData, token) => {
     setUser(userData);
     localStorage.setItem("token", token);
   };
 
+  // requesting the authentication for both login and register
   const authRequest = async (endpoint, payload, errorLabel) => {
     try {
       const res = await fetch(`${API_URL}${endpoint}`, {
@@ -56,44 +56,29 @@ export function AuthProvider({ children }) {
         body: JSON.stringify(payload),
       });
 
-      if (!res.ok) return false;
+      if (!res.ok) return null;
 
       const data = await res.json();
       saveAuth(data.user, data.access_token);
 
-      return true;
+      return data.user; // return the available user data to the caller (login or register handler)
     } catch (err) {
       console.error(`${errorLabel}:`, err);
-      return false;
+      return null;
     }
   };
 
-  // 🔹 Login
+  const login = (email, password) =>
+    authRequest("/auth/login", { email, password }, "Login error");
 
-  const login = async (email, password) => {
-    return authRequest(
-      "/auth/login",
-      { email, password },
-      "Login error"
-    );
-  };
+  const register = (name, email, password) =>
+    authRequest("/auth/register", { name, email, password }, "Register error");
 
-  // 🔹 Register
-  const register = async (name, email, password) => {
-    return authRequest(
-      "/auth/register",
-      { name, email, password },
-      "Register error"
-    );
-  };
-
-  //  Logout
   const logout = () => {
     setUser(null);
     localStorage.removeItem("token");
   };
 
-  //  Verify email 
   const verifyEmail = async (code) => {
     try {
       const token = localStorage.getItem("token");
@@ -119,7 +104,6 @@ export function AuthProvider({ children }) {
     }
   };
 
-  //  Switch role
   const switchRole = async (role) => {
     try {
       const token = localStorage.getItem("token");
@@ -162,13 +146,8 @@ export function AuthProvider({ children }) {
   );
 }
 
-
 export function useAuth() {
   const context = useContext(AuthContext);
-
-  if (!context) {
-    throw new Error("useAuth must be used within AuthProvider");
-  }
-
+  if (!context) throw new Error("useAuth must be used within AuthProvider");
   return context;
 }

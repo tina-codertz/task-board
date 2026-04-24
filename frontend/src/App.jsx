@@ -1,12 +1,13 @@
 import React from "react";
 import { AuthProvider } from "./app/context/AuthContext";
-import { BrowserRouter } from "react-router-dom";
+import { BrowserRouter, Routes,Route } from "react-router-dom";
 import Header from "./app/components/layout/Header";
 import AuthPage from "./app/pages/auth/AuthPage";
 import ProtectedRoutes from "./app/routes/ProtectedRoutes";
 import AdminDashboard from "./app/pages/dashboards/AdminDashboard";
 import ManagerDashboard from "./app/pages/dashboards/ManagerDashboard";
 import MemberDashboard from "./app/pages/dashboards/MemberDashboard";
+
 
 function App() {
   return (
@@ -15,7 +16,9 @@ function App() {
         <Header />
 
         <Routes>
-          <Route path="/auth" element={<AuthPage />} />
+         
+          <Route path="/" element={<AuthPage />} />
+
 
           {/* protected routes */}
           <Route
