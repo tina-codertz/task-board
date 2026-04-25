@@ -1,4 +1,8 @@
-import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import {
+  Injectable,
+  OnModuleInit,
+  OnModuleDestroy,
+} from '@nestjs/common';
 import * as Prisma from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { Pool } from 'pg';
@@ -7,7 +11,10 @@ import * as bcrypt from 'bcrypt';
 const { PrismaClient } = Prisma;
 
 @Injectable()
-export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
+export class PrismaService
+  extends PrismaClient
+  implements OnModuleInit, OnModuleDestroy
+{
   private pool: Pool;
 
   constructor() {
@@ -19,27 +26,60 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
       port: url.port ? parseInt(url.port) : 5432,
       database: url.pathname?.slice(1) || '',
       user: url.username || 'postgres',
-      password: decodeURIComponent(url.password) || 'password', // decode in case of special chars
+      password: decodeURIComponent(url.password) || 'password',
     });
 
-    const adapter = new PrismaPg(pool); 
+    const adapter = new PrismaPg(pool);
 
     super({ adapter });
 
     this.pool = pool;
   }
 
-
   async onModuleInit() {
     await this.$connect();
     console.log('database is connected');
     console.log('DATABASE_URL:', process.env.DATABASE_URL);
+
+    // 👉 create admin on startup
+    await this.createAdminIfNotExists();
   }
-  
 
   async onModuleDestroy() {
     await this.$disconnect();
     await this.pool.end();
   }
-  
+
+  // =========================
+  // 🔐 ADMIN AUTO CREATION
+  // =========================
+  private async createAdminIfNotExists() {
+    try {
+      const email = 'admin1234@gmail.com';
+
+      const existingAdmin = await this.user.findUnique({
+        where: { email },
+      });
+
+      if (existingAdmin) {
+        console.log('Admin already exists');
+        return;
+      }
+
+      const hashedPassword = await bcrypt.hash('admin123', 10);
+
+      const admin = await this.user.create({
+        data: {
+          name: 'Admin',
+          email,
+          password: hashedPassword,
+          role: 'ADMIN', // remove if not in your schema
+        },
+      });
+
+      console.log('Admin created:', admin.email);
+    } catch (error) {
+      console.error('Error creating admin:', error);
+    }
+  }
 }

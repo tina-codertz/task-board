@@ -56,10 +56,15 @@ export function AuthProvider({ children }) {
         body: JSON.stringify(payload),
       });
 
-      if (!res.ok) return null;
-
       const data = await res.json();
+
+      if (!res.ok) {
+        console.error(`${errorLabel}: [${res.status}]`, data);
+        return null;
+      }
+
       saveAuth(data.user, data.access_token);
+      console.log(`${errorLabel} successful:`, data.user);
 
       return data.user; // return the available user data to the caller (login or register handler)
     } catch (err) {

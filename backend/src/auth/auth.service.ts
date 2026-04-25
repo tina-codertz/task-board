@@ -9,8 +9,34 @@ export class AuthService {
         private prisma:PrismaService,
         private jwt:JwtService,
     ){}
+
+    // Helper method to log authentication activity
+    private async logAuthActivity(userId: number, action: string, success: boolean, metadata: any = {}) {
+        try {
+            const prisma = this.prisma as any;
+            await prisma.activityLog.create({
+                data: {
+                    action: `AUTH_${action}`,
+                    description: `${action} attempt ${success ? 'succeeded' : 'failed'}`,
+                    userId,
+                    metadata: {
+                        success,
+                        timestamp: new Date().toISOString(),
+                        ...metadata
+                    }
+                }
+            });
+        } catch (error) {
+            // Silently fail logging - don't interrupt auth flow
+            console.error('Failed to log auth activity:', error);
+        }
+    }
     async register(dto:any){
-        const hashed = await bcrypt.hash(dto.password,10);
+        console.log(`[REGISTER] New registration attempt for: ${dto.email}`);
+        
+        const hashed = await bcrypt.hash(dto.password, 10);
+        console.log(`[REGISTER] Password hashed successfully`);
+        
         const prisma = this.prisma as any;
 
         const user = await prisma.user.create({
@@ -22,24 +48,91 @@ export class AuthService {
             },
         });
 
+        console.log(`[REGISTER SUCCESS] User created: ${user.email}, ID: ${user.id}, Role: ${user.role}`);
+
+        // Log successful registration
+        try {
+            await prisma.activityLog.create({
+                data: {
+                    action: 'AUTH_REGISTER',
+                    description: `New user registered: ${user.name}`,
+                    userId: user.id,
+                    metadata: {
+                        email: user.email,
+                        role: user.role,
+                        timestamp: new Date().toISOString()
+                    }
+                }
+            });
+        } catch (error) {
+            console.error('Failed to log registration:', error);
+        }
+
         return this.signToken(user);
     }
 
     async login(dto:any){
         const prisma = this.prisma as any;
+        let user: any = null;
 
-        const user = await prisma.user.findUnique({
-            where:{email:dto.email},
-        
+        try {
+            console.log(`[LOGIN] Attempting login for email: ${dto.email}`);
+            
+            user = await prisma.user.findUnique({
+                where:{email:dto.email},
+            });
 
-        });
+            if (!user) {
+                console.log(`[LOGIN FAILED] User not found: ${dto.email}`);
+                // Log failed login attempt (user not found)
+                try {
+                    await prisma.activityLog.create({
+                        data: {
+                            action: 'AUTH_LOGIN_FAILED',
+                            description: `Failed login attempt for email: ${dto.email}`,
+                            userId: 0, // Special ID for failed auth attempts
+                            metadata: {
+                                reason: 'user_not_found',
+                                email: dto.email,
+                                timestamp: new Date().toISOString()
+                            }
+                        }
+                    });
+                } catch (logError) {
+                    console.error('Failed to log failed login:', logError);
+                }
+                throw new UnauthorizedException("invalid credentials");
+            }
 
-        if (!user) throw new UnauthorizedException("invalid credentials");
-        const valid = await bcrypt.compare(dto.password, user.password);
-        if (!valid) throw new UnauthorizedException("invalid credentials");
+            console.log(`[LOGIN] User found: ${user.email}, ID: ${user.id}`);
 
-        return this.signToken(user)
+            const valid = await bcrypt.compare(dto.password, user.password);
+            console.log(`[LOGIN] Password comparison result: ${valid}`);
+            
+            if (!valid) {
+                console.log(`[LOGIN FAILED] Invalid password for: ${dto.email}`);
+                // Log failed password attempt
+                await this.logAuthActivity(user.id, 'LOGIN_FAILED', false, {
+                    reason: 'invalid_password',
+                    email: dto.email
+                });
+                throw new UnauthorizedException("invalid credentials");
+            }
 
+            // Login successful - log it
+            console.log(`[LOGIN SUCCESS] User logged in: ${user.email}`);
+            await this.logAuthActivity(user.id, 'LOGIN_SUCCESS', true, {
+                email: user.email,
+                role: user.role
+            });
+
+            return this.signToken(user);
+        } catch (error) {
+            if (error instanceof UnauthorizedException) {
+                throw error;
+            }
+            throw error;
+        }
     }
     signToken(user:any){
         const token = this.jwt.sign({

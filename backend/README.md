@@ -31,6 +31,41 @@
 $ npm install
 ```
 
+## Environment Configuration
+
+Copy the `.env.example` file to `.env` and configure the required environment variables:
+
+```bash
+cp .env.example .env
+```
+
+**Required Environment Variables:**
+- `DATABASE_URL` — PostgreSQL connection string (e.g., `postgresql://user:password@localhost:5432/taskboard`)
+- `JWT_SECRET` — Secret key for JWT token signing (generate a strong random string for production)
+- `ALLOWED_ORIGINS` — CORS-allowed frontend origins
+  - Development: `http://localhost:5173,http://localhost:3000`
+  - Production: `https://yourdomain.com,https://www.yourdomain.com`
+- `PORT` — Server port (default: 3001)
+- `NODE_ENV` — Environment type (development, production)
+
+**Example .env for Development:**
+```
+DATABASE_URL=postgresql://taskboard:password@localhost:5432/taskboard
+JWT_SECRET=your_development_secret_key_change_in_production
+ALLOWED_ORIGINS=http://localhost:5173,http://localhost:3000
+PORT=3001
+NODE_ENV=development
+```
+
+**Example .env for Production:**
+```
+DATABASE_URL=postgresql://taskboard:prod_password@prod-db.example.com:5432/taskboard
+JWT_SECRET=your_production_secret_key_generate_random_string
+ALLOWED_ORIGINS=https://app.example.com
+PORT=3001
+NODE_ENV=production
+```
+
 ## Compile and run the project
 
 ```bash
