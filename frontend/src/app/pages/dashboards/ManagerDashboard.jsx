@@ -130,7 +130,7 @@ const ManagerDashboard = () => {
 
   // ── Derived state
   const availableMembers = selectedTeam
-    ? users.filter(u => !selectedTeam.members?.some(m => m.userId === u.id))
+    ? users.filter(u => u.role === 'USER' && !selectedTeam.members?.some(m => m.userId === u.id))
     : [];
 
   return (
