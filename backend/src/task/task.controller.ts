@@ -29,6 +29,12 @@ export class TaskController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Get('team/:teamId')
+  async getTasksByTeam(@Param('teamId') teamId: string) {
+    return await this.taskService.getTasksByTeam(parseInt(teamId));
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Get(':id')
   async getTaskById(@Param('id') id: string) {
     return await this.taskService.getTaskById(parseInt(id));
@@ -54,12 +60,6 @@ export class TaskController {
   @Delete(':id')
   async deleteTask(@Param('id') id: string, @Request() req: any) {
     return await this.taskService.deleteTask(parseInt(id), req.user.userId);
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Get('team/:teamId')
-  async getTasksByTeam(@Param('teamId') teamId: string) {
-    return await this.taskService.getTasksByTeam(parseInt(teamId));
   }
 
   // Comment endpoints

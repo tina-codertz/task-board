@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { LogOut } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
-import { adminAPI, activityLogAPI } from "../../lib/api";
+import { adminAPI, activityLogAPI } from "../../api/api";
 
 import StatsGrid from "../../components/admin/StatsGrid";
 import TabNav from "../../components/admin/TabNav";

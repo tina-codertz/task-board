@@ -1,234 +1,252 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { Save, Eye, EyeOff } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Save, Eye, EyeOff, ArrowLeft, User, Lock, Shield, CheckCircle, AlertCircle } from 'lucide-react';
+import { authAPI } from '../../api/api';
+
+const ROLE_CONFIG = {
+  ADMIN:   { label: 'Admin',   className: 'bg-rose-100 text-rose-700 border border-rose-200'   },
+  MANAGER: { label: 'Manager', className: 'bg-sky-100 text-sky-700 border border-sky-200'       },
+  USER:    { label: 'Member',  className: 'bg-slate-100 text-slate-600 border border-slate-200' },
+};
+
+const inputCls = (disabled) =>
+  `w-full px-4 py-2.5 rounded-lg border text-sm transition-all outline-none
+   ${disabled
+     ? 'bg-slate-50 border-slate-200 text-slate-500 cursor-not-allowed'
+     : 'bg-white border-slate-300 text-slate-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-100'}`;
+
+const Field = ({ label, children }) => (
+  <div className="space-y-1.5">
+    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide">{label}</label>
+    {children}
+  </div>
+);
+
+const PasswordField = ({ name, value, onChange, showPassword, placeholder }) => (
+  <div className="relative">
+    <input
+      type={showPassword ? 'text' : 'password'}
+      name={name}
+      value={value}
+      onChange={onChange}
+      className={inputCls(false) + ' pr-10'}
+      placeholder={placeholder}
+    />
+  </div>
+);
 
 export const UserProfile = () => {
   const { user } = useAuth();
-  const [isEditing, setIsEditing] = useState(false);
+  const navigate = useNavigate();
+
+  const [isEditing,    setIsEditing]    = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState('');
+  const [loading,      setLoading]      = useState(false);
+  const [message,      setMessage]      = useState(null);
+
+  const blankPasswords = { currentPassword: '', newPassword: '', confirmPassword: '' };
+
   const [formData, setFormData] = useState({
-    name: user?.name || '',
+    name:  user?.name  || '',
     email: user?.email || '',
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: ''
+    ...blankPasswords,
   });
 
   useEffect(() => {
-    if (user) {
-      setFormData(prev => ({
-        ...prev,
-        name: user.name,
-        email: user.email
-      }));
-    }
+    if (user) setFormData(prev => ({ ...prev, name: user.name, email: user.email }));
   }, [user]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleCancel = () => {
+    setIsEditing(false);
+    setMessage(null);
+    setFormData({ name: user?.name || '', email: user?.email || '', ...blankPasswords });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setMessage('');
+    setMessage(null);
 
     if (formData.newPassword && formData.newPassword !== formData.confirmPassword) {
-      setMessage({ type: 'error', text: 'Passwords do not match' });
+      setMessage({ type: 'error', text: 'New passwords do not match.' });
       return;
     }
 
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
-      const payload = {
-        name: formData.name,
-        email: formData.email
-      };
-
+      const payload = { name: formData.name, email: formData.email };
       if (formData.newPassword) {
         payload.currentPassword = formData.currentPassword;
         payload.newPassword = formData.newPassword;
       }
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/update-profile`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify(payload)
-      });
+      await authAPI.updateProfile(payload.name, payload.email, payload.currentPassword, payload.newPassword);
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to update profile');
-      }
-
-      setMessage({ type: 'success', text: 'Profile updated successfully' });
-      setFormData(prev => ({
-        ...prev,
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: ''
-      }));
+      setMessage({ type: 'success', text: 'Profile updated successfully.' });
+      setFormData(prev => ({ ...prev, ...blankPasswords }));
       setIsEditing(false);
     } catch (err) {
-      setMessage({ type: 'error', text: err.message });
+      setMessage({ type: 'error', text: err.message || 'Failed to update profile.' });
     } finally {
       setLoading(false);
     }
   };
 
+  const role = ROLE_CONFIG[user?.role] ?? ROLE_CONFIG.USER;
+
+  // Back destination by role
+  const dashboardPath =
+    user?.role === 'ADMIN'   ? '/admin'   :
+    user?.role === 'MANAGER' ? '/manager' : '/dashboard';
+
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-2xl mx-auto">
-        <div className="bg-white rounded-lg shadow-md overflow-hidden">
-          {/* Header */}
-          <div className="bg-gradient-to-r from-blue-600 to-blue-800 px-6 py-8">
-            <h1 className="text-3xl font-bold text-white">My Profile</h1>
-            <p className="text-blue-100 mt-2">Manage your account information</p>
+    <div className="min-h-screen bg-slate-50 py-10 px-4">
+
+      {/* Back button */}
+      <div className="max-w-xl mx-auto mb-4">
+        <button
+          onClick={() => navigate(dashboardPath)}
+          className="flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-800 transition-colors group"
+        >
+          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+          Back to Dashboard
+        </button>
+      </div>
+
+      <div className="max-w-xl mx-auto">
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+
+          {/* Header band */}
+          <div className="relative bg-gradient-to-br from-slate-800 to-slate-900 px-8 py-8">
+            {/* Avatar circle */}
+            <div className="flex items-center gap-5">
+              <div className="w-16 h-16 rounded-full bg-white/10 border-2 border-white/20 flex items-center justify-center shrink-0">
+                <User className="w-8 h-8 text-white/70" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-white leading-tight">{user?.name}</h1>
+                <p className="text-slate-400 text-sm mt-0.5">{user?.email}</p>
+                <span className={`inline-flex items-center gap-1.5 mt-2 px-2.5 py-0.5 rounded-full text-xs font-semibold ${role.className}`}>
+                  <Shield className="w-3 h-3" />
+                  {role.label}
+                </span>
+              </div>
+            </div>
           </div>
 
-          {/* Content */}
-          <div className="p-6 sm:p-8">
+          {/* Body */}
+          <div className="px-8 py-8">
+
+            {/* Alert */}
             {message && (
-              <div className={`mb-6 p-4 rounded-lg ${
+              <div className={`mb-6 flex items-start gap-3 p-4 rounded-xl text-sm font-medium border ${
                 message.type === 'success'
-                  ? 'bg-green-50 border border-green-200 text-green-800'
-                  : 'bg-red-50 border border-red-200 text-red-800'
+                  ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
+                  : 'bg-rose-50 border-rose-200 text-rose-700'
               }`}>
+                {message.type === 'success'
+                  ? <CheckCircle className="w-4 h-4 mt-0.5 shrink-0" />
+                  : <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />}
                 {message.text}
               </div>
             )}
 
-            {/* Role Badge */}
-            <div className="mb-6">
-              <div className="inline-block">
-                <span className={`px-4 py-2 rounded-full text-sm font-semibold ${
-                  user?.role === 'ADMIN'
-                    ? 'bg-red-100 text-red-800'
-                    : user?.role === 'MANAGER'
-                    ? 'bg-blue-100 text-blue-800'
-                    : 'bg-gray-100 text-gray-800'
-                }`}>
-                  {user?.role}
-                </span>
-              </div>
-            </div>
+            <form onSubmit={handleSubmit} className="space-y-8">
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Basic Info */}
+              {/* Basic Info section */}
               <div>
-                <h2 className="text-lg font-semibold text-gray-900 mb-4 pb-4 border-b border-gray-200">
-                  Basic Information
-                </h2>
-                
+                <div className="flex items-center gap-2 mb-5">
+                  <User className="w-4 h-4 text-slate-400" />
+                  <h2 className="text-sm font-bold text-slate-700 uppercase tracking-wide">Basic Information</h2>
+                </div>
                 <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Full Name
-                    </label>
+                  <Field label="Full Name">
                     <input
                       type="text"
                       name="name"
                       value={formData.name}
                       onChange={handleChange}
                       disabled={!isEditing}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-600"
+                      className={inputCls(!isEditing)}
                     />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Email Address
-                    </label>
+                  </Field>
+                  <Field label="Email Address">
                     <input
                       type="email"
                       name="email"
                       value={formData.email}
                       onChange={handleChange}
                       disabled={!isEditing}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-600"
+                      className={inputCls(!isEditing)}
                     />
-                  </div>
+                  </Field>
                 </div>
               </div>
 
-              {/* Password Section */}
+              {/* Password section — only while editing */}
               {isEditing && (
                 <div>
-                  <h2 className="text-lg font-semibold text-gray-900 mb-4 pb-4 border-b border-gray-200">
-                    Change Password (Optional)
-                  </h2>
-                  
+                  <div className="flex items-center justify-between mb-5">
+                    <div className="flex items-center gap-2">
+                      <Lock className="w-4 h-4 text-slate-400" />
+                      <h2 className="text-sm font-bold text-slate-700 uppercase tracking-wide">Change Password</h2>
+                      <span className="text-xs text-slate-400 font-normal normal-case">(optional)</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(p => !p)}
+                      className="flex items-center gap-1 text-xs text-slate-400 hover:text-slate-600 transition-colors"
+                    >
+                      {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                      {showPassword ? 'Hide' : 'Show'}
+                    </button>
+                  </div>
                   <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Current Password
-                      </label>
-                      <div className="relative">
-                        <input
-                          type={showPassword ? 'text' : 'password'}
-                          name="currentPassword"
-                          value={formData.currentPassword}
+                    <Field label="Current Password">
+                      <PasswordField
+                        name="currentPassword"
+                        value={formData.currentPassword}
+                        onChange={handleChange}
+                        showPassword={showPassword}
+                        placeholder="Enter current password"
+                      />
+                    </Field>
+                    <div className="grid grid-cols-2 gap-4">
+                      <Field label="New Password">
+                        <PasswordField
+                          name="newPassword"
+                          value={formData.newPassword}
                           onChange={handleChange}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-10"
-                          placeholder="Leave blank if not changing password"
+                          showPassword={showPassword}
+                          placeholder="New password"
                         />
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-3 top-2.5 text-gray-500"
-                        >
-                          {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                        </button>
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        New Password
-                      </label>
-                      <input
-                        type={showPassword ? 'text' : 'password'}
-                        name="newPassword"
-                        value={formData.newPassword}
-                        onChange={handleChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Leave blank if not changing password"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Confirm Password
-                      </label>
-                      <input
-                        type={showPassword ? 'text' : 'password'}
-                        name="confirmPassword"
-                        value={formData.confirmPassword}
-                        onChange={handleChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Leave blank if not changing password"
-                      />
+                      </Field>
+                      <Field label="Confirm Password">
+                        <PasswordField
+                          name="confirmPassword"
+                          value={formData.confirmPassword}
+                          onChange={handleChange}
+                          showPassword={showPassword}
+                          placeholder="Repeat password"
+                        />
+                      </Field>
                     </div>
                   </div>
                 </div>
               )}
 
-              {/* Action Buttons */}
-              <div className="flex gap-3 pt-6 border-t border-gray-200">
+              {/* Actions */}
+              <div className="flex gap-3 pt-2 border-t border-slate-100">
                 {!isEditing ? (
                   <button
                     type="button"
-                    onClick={() => setIsEditing(true)}
-                    className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition font-medium"
+                    onClick={() => { setIsEditing(true); setMessage(null); }}
+                    className="flex-1 py-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-white text-sm font-semibold transition-colors"
                   >
                     Edit Profile
                   </button>
@@ -236,27 +254,18 @@ export const UserProfile = () => {
                   <>
                     <button
                       type="button"
-                      onClick={() => {
-                        setIsEditing(false);
-                        setFormData({
-                          name: user?.name || '',
-                          email: user?.email || '',
-                          currentPassword: '',
-                          newPassword: '',
-                          confirmPassword: ''
-                        });
-                      }}
-                      className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition font-medium"
+                      onClick={handleCancel}
+                      className="flex-1 py-2.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 text-sm font-semibold transition-colors"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
                       disabled={loading}
-                      className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white rounded-lg transition font-medium flex items-center justify-center gap-2"
+                      className="flex-1 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 text-white text-sm font-semibold transition-colors flex items-center justify-center gap-2"
                     >
                       <Save className="w-4 h-4" />
-                      {loading ? 'Saving...' : 'Save Changes'}
+                      {loading ? 'Saving…' : 'Save Changes'}
                     </button>
                   </>
                 )}
