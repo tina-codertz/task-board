@@ -1,390 +1,405 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { Plus, Edit2, Trash2, Users, LogOut, MoreVertical } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import TaskCard from '../../components/tasks/TaskCard';
-import TaskDetailsModal from '../../components/tasks/TaskDetailsModal';
+import CreateTaskModal from '../../components/tasks/CreateTaskModal';
+import TaskDetailModal from '../../components/manager/TaskDetailModal';
+import Header from '../../components/layout/Header';
+import ManagerTabNav from '../../components/manager/ManagerTabNav';
+import TasksTab from '../../components/manager/TasksTab';
+import TeamsTab from '../../components/manager/TeamsTab';
+import { CreateTeamModal, AddMemberModal } from '../../components/manager/ManagerModal';
+import { ErrorAlert } from '../../components/admin/Alerts';
+import { taskAPI, teamAPI, authAPI } from '../../lib/api';
+import { 
+  TrendingUp, 
+  Users, 
+  CheckCircle2, 
+  Clock, 
+  AlertCircle,
+  BarChart3,
+  Award,
+  Calendar,
+  Activity,
+  Zap,
+  Target,
+  PieChart,
+  RefreshCw
+} from 'lucide-react';
 
 const ManagerDashboard = () => {
   const { user, logout } = useAuth();
-  const [tabs, setTabs] = useState('tasks');
-  const [teams, setTeams] = useState([]);
-  const [tasks, setTasks] = useState([]);
-  const [teamMembers, setTeamMembers] = useState([]);
+
+  const [activeTab, setActiveTab] = useState('tasks');
+  const [teams, setTeams] = useState([]); // Initialize as empty array
+  const [tasks, setTasks] = useState([]); // Initialize as empty array
+  const [users, setUsers] = useState([]); // Initialize as empty array
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showTaskModal, setShowTaskModal] = useState(false);
+  const [showTaskDetailModal, setShowTaskDetailModal] = useState(false);
   const [showTeamModal, setShowTeamModal] = useState(false);
+  const [showAddMemberModal, setShowAddMemberModal] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
+  const [viewingTask, setViewingTask] = useState(null);
   const [selectedTeam, setSelectedTeam] = useState(null);
-  const [newTeam, setNewTeam] = useState({ name: '' });
-
-  useEffect(() => {
-    fetchData();
-  }, []);
+  const [refreshing, setRefreshing] = useState(false);
 
   const fetchData = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
-
-      // Fetch teams
-      const teamsRes = await fetch(`${import.meta.env.VITE_API_URL}/teams`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (teamsRes.ok) {
-        const data = await teamsRes.json();
-        setTeams(data.teams || []);
-      }
-
-      // Fetch tasks
-      const tasksRes = await fetch(`${import.meta.env.VITE_API_URL}/tasks`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (tasksRes.ok) {
-        const data = await tasksRes.json();
-        setTasks(data.tasks || []);
-      }
+      const [teamsData, tasksData, usersData] = await Promise.all([
+        teamAPI.getAllTeams(),
+        taskAPI.getAllTasks(),
+        authAPI.getAllUsers(),
+      ]);
+      // Ensure we always set arrays, even if the response is undefined
+      setTeams(teamsData?.teams || []);
+      setTasks(tasksData?.tasks || []);
+      setUsers(usersData?.users || []);
     } catch (err) {
       setError(err.message);
+      // Set empty arrays on error to prevent undefined errors
+      setTeams([]);
+      setTasks([]);
+      setUsers([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCreateTeam = async (e) => {
-    e.preventDefault();
-    if (!newTeam.name.trim()) return;
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await fetchData();
+    setTimeout(() => setRefreshing(false), 500);
+  };
 
+  useEffect(() => { fetchData(); }, []);
+
+  const handleCreateTeam = async ({ name }) => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/teams`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify(newTeam)
-      });
-
-      if (!response.ok) throw new Error('Failed to create team');
-
-      setNewTeam({ name: '' });
+      await teamAPI.createTeam(name, '');
       setShowTeamModal(false);
       fetchData();
-    } catch (err) {
-      setError(err.message);
-    }
+    } catch (err) { setError(err.message); }
   };
 
   const handleDeleteTeam = async (teamId) => {
+    if (!confirm('Are you sure you want to delete this team?')) return;
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/teams/${teamId}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      if (!response.ok) throw new Error('Failed to delete team');
-
+      await teamAPI.deleteTeam(teamId);
       fetchData();
-    } catch (err) {
-      setError(err.message);
-    }
+    } catch (err) { setError(err.message); }
   };
+
+  const handleAddMember = async (userId) => {
+    try {
+      await teamAPI.addMember(selectedTeam.id, userId);
+      setShowAddMemberModal(false);
+      setSelectedTeam(null);
+      fetchData();
+    } catch (err) { setError(err.message); }
+  };
+
+  const handleRemoveMember = async (teamId, memberId) => {
+    if (!confirm('Remove this member from the team?')) return;
+    try {
+      await teamAPI.removeMember(teamId, memberId);
+      fetchData();
+    } catch (err) { setError(err.message); }
+  };
+
+  const buildTaskPayload = (data) => ({
+    ...data,
+    assignedToId: data.assignedToId ? parseInt(data.assignedToId) : null,
+    teamId: data.teamId ? parseInt(data.teamId) : null,
+  });
 
   const handleCreateTask = async (taskData) => {
     try {
-      const token = localStorage.getItem('token');
-      const payload = {
-        ...taskData,
-        teamId: selectedTeam?.id
-      };
-
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/tasks`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify(payload)
-      });
-
-      if (!response.ok) throw new Error('Failed to create task');
-
+      const payload = buildTaskPayload(taskData);
+      await taskAPI.createTask(payload.title, payload.description, payload.status, payload.teamId, payload.assignedToId);
       setShowTaskModal(false);
-      setEditingTask(null);
       fetchData();
-    } catch (err) {
-      setError(err.message);
-    }
+    } catch (err) { setError(err.message); }
   };
 
   const handleUpdateTask = async (taskData) => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/tasks/${editingTask.id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify(taskData)
-      });
-
-      if (!response.ok) throw new Error('Failed to update task');
-
+      const payload = buildTaskPayload(taskData);
+      await taskAPI.updateTask(editingTask.id, payload.title, payload.description, payload.status, payload.assignedToId);
       setShowTaskModal(false);
       setEditingTask(null);
       fetchData();
-    } catch (err) {
-      setError(err.message);
-    }
+    } catch (err) { setError(err.message); }
   };
 
   const handleDeleteTask = async (taskId) => {
+    if (!confirm('Are you sure you want to delete this task?')) return;
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/tasks/${taskId}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      if (!response.ok) throw new Error('Failed to delete task');
-
+      await taskAPI.deleteTask(taskId);
       fetchData();
-    } catch (err) {
-      setError(err.message);
-    }
+    } catch (err) { setError(err.message); }
   };
 
   const handleCloseTask = async (taskId) => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/tasks/${taskId}/status`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({ status: 'DONE' })
-      });
-
-      if (!response.ok) throw new Error('Failed to close task');
-
+      await taskAPI.updateTaskStatus(taskId, 'DONE');
       fetchData();
-    } catch (err) {
-      setError(err.message);
-    }
+    } catch (err) { setError(err.message); }
+  };
+
+  const handleViewTask = (task) => {
+    setViewingTask(task);
+    setShowTaskDetailModal(true);
+  };
+
+  // Safe calculations with fallback values
+  const stats = {
+    totalTasks: tasks?.length || 0,
+    completedTasks: tasks?.filter(t => t?.status === 'DONE')?.length || 0,
+    inProgressTasks: tasks?.filter(t => t?.status === 'IN_PROGRESS')?.length || 0,
+    todoTasks: tasks?.filter(t => t?.status === 'TODO')?.length || 0,
+    totalTeams: teams?.length || 0,
+    totalMembers: teams?.reduce((sum, team) => sum + (team?.members?.length || 0), 0) || 0,
+    completionRate: tasks?.length > 0 ? Math.round((tasks?.filter(t => t?.status === 'DONE')?.length / tasks?.length) * 100) : 0,
+  };
+
+  const availableMembers = selectedTeam
+    ? (users?.filter(u => u?.role === 'USER' && !selectedTeam?.members?.some(m => m?.userId === u?.id)) || [])
+    : [];
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/20 to-indigo-50/20">
+      <Header title="Manager Dashboard" userName={user?.name} onLogout={logout} />
+
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <ErrorAlert message={error} onClose={() => setError('')} />
+
+        {/* Welcome Section with Stats Overview */}
+        <div className="mb-8">
+          <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-2xl p-6 text-white shadow-xl">
+            <div className="flex items-start justify-between flex-wrap gap-4">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-3">
+                  <Zap className="w-5 h-5 text-yellow-300" />
+                  <span className="text-blue-100 text-sm font-medium">Management Overview</span>
+                </div>
+                <h2 className="text-2xl font-bold mb-2">Welcome back, {user?.name?.split(' ')[0] || 'Manager'}! </h2>
+                <p className="text-blue-100 text-sm max-w-lg">
+                  Track team performance, manage tasks, and monitor project progress from your command center.
+                </p>
+              </div>
+              
+              {/* Quick Stats Cards */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <QuickStatCard 
+                  icon={Target} 
+                  label="Completion" 
+                  value={`${stats.completionRate}%`}
+                  color="green"
+                />
+                <QuickStatCard 
+                  icon={Activity} 
+                  label="Active Tasks" 
+                  value={stats.inProgressTasks}
+                  color="yellow"
+                />
+                <QuickStatCard 
+                  icon={Users} 
+                  label="Teams" 
+                  value={stats.totalTeams}
+                  color="blue"
+                />
+                <QuickStatCard 
+                  icon={Award} 
+                  label="Members" 
+                  value={stats.totalMembers}
+                  color="purple"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Advanced Analytics Dashboard */}
+        <div className="mb-8 grid grid-cols-1 md:grid-cols-4 gap-4">
+          <AnalyticsCard
+            icon={BarChart3}
+            title="Total Tasks"
+            value={stats.totalTasks}
+            subtitle="All time"
+            color="blue"
+            trend={+12}
+          />
+          <AnalyticsCard
+            icon={CheckCircle2}
+            title="Completed"
+            value={stats.completedTasks}
+            subtitle={`${stats.completionRate}% of total`}
+            color="green"
+            trend={+8}
+          />
+          <AnalyticsCard
+            icon={Clock}
+            title="In Progress"
+            value={stats.inProgressTasks}
+            subtitle="Active tasks"
+            color="orange"
+            trend={-3}
+          />
+          <AnalyticsCard
+            icon={AlertCircle}
+            title="To Do"
+            value={stats.todoTasks}
+            subtitle="Pending tasks"
+            color="red"
+            trend={+5}
+          />
+        </div>
+
+        {/* Tab Navigation with Refresh Button */}
+        <div className="mb-8 flex items-center justify-between flex-wrap gap-4">
+          <ManagerTabNav activeTab={activeTab} onTabChange={setActiveTab} />
+          
+          <button
+            onClick={handleRefresh}
+            disabled={refreshing}
+            className="flex items-center gap-2 px-4 py-2 bg-white rounded-xl shadow-sm text-gray-600 hover:bg-gray-50 transition-all disabled:opacity-50"
+          >
+            <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
+            <span className="text-sm">Refresh</span>
+          </button>
+        </div>
+
+        {/* Tab Content with Animation */}
+        <div className="animate-fade-in">
+          {activeTab === 'tasks' && (
+            <TasksTab
+              tasks={tasks || []}
+              loading={loading}
+              onCreateTask={() => { setEditingTask(null); setShowTaskModal(true); }}
+              onEditTask={(task) => { setEditingTask(task); setShowTaskModal(true); }}
+              onDeleteTask={handleDeleteTask}
+              onCloseTask={handleCloseTask}
+              onViewTask={handleViewTask}
+            />
+          )}
+
+          {activeTab === 'teams' && (
+            <TeamsTab
+              teams={teams || []}
+              loading={loading}
+              onCreateTeam={() => setShowTeamModal(true)}
+              onDeleteTeam={handleDeleteTeam}
+              onAddMember={(team) => { setSelectedTeam(team); setShowAddMemberModal(true); }}
+              onRemoveMember={handleRemoveMember}
+            />
+          )}
+        </div>
+      </main>
+
+      {/* Modals with Enhanced UI */}
+      <CreateTaskModal
+        isOpen={showTaskModal}
+        task={editingTask}
+        onClose={() => { setShowTaskModal(false); setEditingTask(null); }}
+        onSave={editingTask ? handleUpdateTask : handleCreateTask}
+        isEditing={!!editingTask}
+        teams={teams || []}
+        users={users?.filter(u => u?.id !== user?.id && u?.role === 'USER') || []}
+      />
+
+      <TaskDetailModal
+        isOpen={showTaskDetailModal}
+        task={viewingTask}
+        onClose={() => { setShowTaskDetailModal(false); setViewingTask(null); }}
+        currentUserId={user?.id}
+      />
+
+      {/* Team Modals with Better Styling */}
+      {showTeamModal && (
+        <CreateTeamModal onClose={() => setShowTeamModal(false)} onSubmit={handleCreateTeam} />
+      )}
+
+      {showAddMemberModal && (
+        <AddMemberModal
+          team={selectedTeam}
+          availableMembers={availableMembers}
+          onClose={() => { setShowAddMemberModal(false); setSelectedTeam(null); }}
+          onSubmit={handleAddMember}
+        />
+      )}
+    </div>
+  );
+};
+
+// QuickStatCard component
+const QuickStatCard = ({ icon: Icon, label, value, color }) => {
+  const colors = {
+    green: 'bg-green-500/20 border-green-400/30',
+    yellow: 'bg-yellow-500/20 border-yellow-400/30',
+    blue: 'bg-blue-500/20 border-blue-400/30',
+    purple: 'bg-purple-500/20 border-purple-400/30',
+  };
+
+  const iconColors = {
+    green: 'text-green-300',
+    yellow: 'text-yellow-300',
+    blue: 'text-blue-300',
+    purple: 'text-purple-300',
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <h1 className="text-3xl font-bold text-gray-900">Manager Dashboard</h1>
-          <div className="flex items-center gap-4">
-            <Link
-              to="/profile"
-              className="text-gray-600 hover:text-gray-900 font-medium"
-            >
-              {user?.name}
-            </Link>
-            <button
-              onClick={logout}
-              className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition"
-            >
-              <LogOut className="w-4 h-4" />
-              Logout
-            </button>
-          </div>
-        </div>
-      </header>
+    <div className={`backdrop-blur-sm rounded-xl p-3 border ${colors[color]} transition-all hover:scale-105`}>
+      <div className="flex items-center gap-2">
+        <Icon className={`w-4 h-4 ${iconColors[color]}`} />
+        <span className="text-xs text-white/70">{label}</span>
+      </div>
+      <div className="text-xl font-bold text-white mt-1">{value}</div>
+    </div>
+  );
+};
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-800 rounded-lg">
-            {error}
+// AnalyticsCard component
+const AnalyticsCard = ({ icon: Icon, title, value, subtitle, color, trend }) => {
+  const bgGradients = {
+    blue: 'from-blue-50 to-indigo-50',
+    green: 'from-green-50 to-emerald-50',
+    orange: 'from-orange-50 to-amber-50',
+    red: 'from-red-50 to-rose-50',
+  };
+
+  const iconBgs = {
+    blue: 'bg-blue-100',
+    green: 'bg-green-100',
+    orange: 'bg-orange-100',
+    red: 'bg-red-100',
+  };
+
+  const iconColors = {
+    blue: 'text-blue-600',
+    green: 'text-green-600',
+    orange: 'text-orange-600',
+    red: 'text-red-600',
+  };
+
+  return (
+    <div className={`bg-gradient-to-br ${bgGradients[color]} rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300 group`}>
+      <div className="flex items-start justify-between mb-3">
+        <div className={`${iconBgs[color]} p-2 rounded-xl group-hover:scale-110 transition-transform duration-300`}>
+          <Icon className={`w-5 h-5 ${iconColors[color]}`} />
+        </div>
+        {trend && (
+          <div className={`flex items-center gap-1 text-xs font-medium ${trend > 0 ? 'text-green-600' : 'text-red-600'}`}>
+            <TrendingUp className={`w-3 h-3 ${trend < 0 ? 'rotate-180' : ''}`} />
+            <span>{Math.abs(trend)}%</span>
           </div>
         )}
-
-        {/* Tabs */}
-        <div className="flex gap-4 mb-8 border-b border-gray-200">
-          <button
-            onClick={() => setTabs('tasks')}
-            className={`px-4 py-2 font-medium border-b-2 transition ${
-              tabs === 'tasks'
-                ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-gray-600 hover:text-gray-900'
-            }`}
-          >
-            Tasks
-          </button>
-          <button
-            onClick={() => setTabs('teams')}
-            className={`px-4 py-2 font-medium border-b-2 transition ${
-              tabs === 'teams'
-                ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-gray-600 hover:text-gray-900'
-            }`}
-          >
-            Teams
-          </button>
-        </div>
-
-        {/* Tasks Tab */}
-        {tabs === 'tasks' && (
-          <div>
-            <div className="mb-6 flex justify-between items-center">
-              <h2 className="text-2xl font-bold text-gray-900">Tasks</h2>
-              <button
-                onClick={() => {
-                  setEditingTask(null);
-                  setShowTaskModal(true);
-                }}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition"
-              >
-                <Plus className="w-4 h-4" />
-                Create Task
-              </button>
-            </div>
-
-            {loading ? (
-              <div className="text-center py-8 text-gray-600">Loading tasks...</div>
-            ) : tasks.length === 0 ? (
-              <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
-                <p className="text-gray-600">No tasks yet. Create one to get started!</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {tasks.map(task => (
-                  <div key={task.id} className="relative">
-                    <TaskCard
-                      task={task}
-                      onEdit={() => {
-                        setEditingTask(task);
-                        setShowTaskModal(true);
-                      }}
-                      onDelete={handleDeleteTask}
-                      canEdit={true}
-                      canDelete={true}
-                    />
-                    {task.status !== 'DONE' && (
-                      <button
-                        onClick={() => handleCloseTask(task.id)}
-                        className="mt-2 w-full px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded transition"
-                      >
-                        Mark as Done
-                      </button>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Teams Tab */}
-        {tabs === 'teams' && (
-          <div>
-            <div className="mb-6 flex justify-between items-center">
-              <h2 className="text-2xl font-bold text-gray-900">Teams</h2>
-              <button
-                onClick={() => setShowTeamModal(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition"
-              >
-                <Plus className="w-4 h-4" />
-                Create Team
-              </button>
-            </div>
-
-            {loading ? (
-              <div className="text-center py-8 text-gray-600">Loading teams...</div>
-            ) : teams.length === 0 ? (
-              <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
-                <p className="text-gray-600">No teams yet. Create one to get started!</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {teams.map(team => (
-                  <div key={team.id} className="bg-white rounded-lg shadow p-6 hover:shadow-md transition">
-                    <div className="flex justify-between items-start mb-4">
-                      <h3 className="text-lg font-semibold text-gray-900">{team.name}</h3>
-                      <button
-                        onClick={() => handleDeleteTeam(team.id)}
-                        className="text-red-600 hover:text-red-800"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                    <div className="flex items-center gap-2 text-gray-600">
-                      <Users className="w-4 h-4" />
-                      <span className="text-sm">{team.members?.length || 0} members</span>
-                    </div>
-                    <p className="text-xs text-gray-500 mt-3">
-                      Created {new Date(team.createdAt).toLocaleDateString()}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-      </main>
-
-      {/* Task Modal */}
-      <TaskDetailsModal
-        isOpen={showTaskModal}
-        task={editingTask}
-        onClose={() => {
-          setShowTaskModal(false);
-          setEditingTask(null);
-        }}
-        onSave={editingTask ? handleUpdateTask : handleCreateTask}
-        isEditing={!!editingTask}
-      />
-
-      {/* Team Modal */}
-      {showTeamModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Create Team</h2>
-
-            <form onSubmit={handleCreateTeam} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Team Name *
-                </label>
-                <input
-                  type="text"
-                  value={newTeam.name}
-                  onChange={(e) => setNewTeam({ ...newTeam, name: e.target.value })}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter team name"
-                />
-              </div>
-
-              <div className="flex gap-3 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setShowTeamModal(false)}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition"
-                >
-                  Create
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      </div>
+      <div className="space-y-1">
+        <p className="text-2xl font-bold text-gray-900">{value}</p>
+        <p className="text-sm text-gray-600 font-medium">{title}</p>
+        <p className="text-xs text-gray-400">{subtitle}</p>
+      </div>
     </div>
   );
 };

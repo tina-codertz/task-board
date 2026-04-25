@@ -12,7 +12,7 @@ async function bootstrap() {
     origin:"http://localhost:5173", //this is the vite url
     credentials:true
   })
-  await app.listen(process.env.PORT ?? 3000);
-  console.log("the backend is running on port 3000")
+  await app.listen(process.env.PORT ?? 3001);
+  console.log("the backend is running on port 3001")
 }
 bootstrap();
