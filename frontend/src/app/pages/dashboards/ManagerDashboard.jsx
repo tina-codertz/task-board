@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import CreateTaskModal from '../../components/tasks/CreateTaskModal';
+import TaskDetailModal from '../../components/manager/TaskDetailModal';
 import Header from '../../components/layout/Header';
 import ManagerTabNav from '../../components/manager/ManagerTabNav';
 import TasksTab from '../../components/manager/TasksTab';
 import TeamsTab from '../../components/manager/TeamsTab';
 import { CreateTeamModal, AddMemberModal } from '../../components/manager/ManagerModal';
 import { ErrorAlert } from '../../components/admin/Alerts';
-import { taskAPI, teamAPI, authAPI } from '../../api/api';
+import { taskAPI, teamAPI, authAPI } from '../../lib/api';
 
 const ManagerDashboard = () => {
   const { user, logout } = useAuth();
@@ -19,9 +20,11 @@ const ManagerDashboard = () => {
   const [loading,            setLoading]            = useState(false);
   const [error,              setError]              = useState('');
   const [showTaskModal,      setShowTaskModal]      = useState(false);
+  const [showTaskDetailModal, setShowTaskDetailModal] = useState(false);
   const [showTeamModal,      setShowTeamModal]      = useState(false);
   const [showAddMemberModal, setShowAddMemberModal] = useState(false);
   const [editingTask,        setEditingTask]        = useState(null);
+  const [viewingTask,        setViewingTask]        = useState(null);
   const [selectedTeam,       setSelectedTeam]       = useState(null);
 
   // ── Data fetching ───────────────────────────────────────────────────────────
@@ -120,6 +123,11 @@ const ManagerDashboard = () => {
     } catch (err) { setError(err.message); }
   };
 
+  const handleViewTask = (task) => {
+    setViewingTask(task);
+    setShowTaskDetailModal(true);
+  };
+
   // ── Derived state
   const availableMembers = selectedTeam
     ? users.filter(u => !selectedTeam.members?.some(m => m.userId === u.id))
@@ -142,6 +150,7 @@ const ManagerDashboard = () => {
             onEditTask={(task) => { setEditingTask(task); setShowTaskModal(true); }}
             onDeleteTask={handleDeleteTask}
             onCloseTask={handleCloseTask}
+            onViewTask={handleViewTask}
           />
         )}
 
@@ -166,6 +175,14 @@ const ManagerDashboard = () => {
         isEditing={!!editingTask}
         teams={teams}
         users={users.filter(u => u.id !== user?.id && u.role === 'USER')}
+      />
+
+      {/* Task Detail Modal */}
+      <TaskDetailModal
+        isOpen={showTaskDetailModal}
+        task={viewingTask}
+        onClose={() => { setShowTaskDetailModal(false); setViewingTask(null); }}
+        currentUserId={user?.id}
       />
 
       {/* Team Modals */}

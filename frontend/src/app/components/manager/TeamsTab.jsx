@@ -25,10 +25,10 @@ const TeamsTab = ({
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-max">
         {teams && teams.length > 0 ? (
           teams.map(team => (
-            <div key={team.id} className="bg-white rounded-lg shadow p-6">
+            <div key={team.id} className="bg-white rounded-lg shadow p-6 flex flex-col">
               <div className="flex justify-between items-start mb-4">
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">{team.name}</h3>
@@ -43,13 +43,13 @@ const TeamsTab = ({
                 </button>
               </div>
 
-              <div className="mb-4">
+              <div className="mb-4 flex-1">
                 <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
                   <Users className="w-4 h-4" />
                   <span>{team.members?.length || 0} members</span>
                 </div>
                 {team.members && team.members.length > 0 && (
-                  <div className="space-y-2">
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
                     {team.members.map(member => (
                       <div
                         key={member.id}

@@ -1,4 +1,4 @@
-import { Plus, Edit2, Trash2, CheckCircle } from 'lucide-react';
+import { Plus, Edit2, Trash2, CheckCircle, Eye } from 'lucide-react';
 
 const TasksTab = ({
   tasks,
@@ -7,6 +7,7 @@ const TasksTab = ({
   onEditTask,
   onDeleteTask,
   onCloseTask,
+  onViewTask,
 }) => {
   if (loading) {
     return <div className="text-center py-8 text-gray-600">Loading tasks...</div>;
@@ -62,6 +63,13 @@ const TasksTab = ({
                     <td className="px-6 py-4 text-sm text-gray-600">{task.assignedTo?.name || '—'}</td>
                     <td className="px-6 py-4 text-sm">
                       <div className="flex gap-2">
+                        <button
+                          onClick={() => onViewTask(task)}
+                          className="text-green-600 hover:text-green-800 p-2"
+                          title="View task details"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </button>
                         <button
                           onClick={() => onEditTask(task)}
                           className="text-blue-600 hover:text-blue-800 p-2"
