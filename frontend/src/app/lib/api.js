@@ -37,7 +37,7 @@ export const authAPI = {
       currentPassword,
       newPassword,
     }),
-  getAllUsers: () => get("/auth/users"),
+      getAllUsers: () => get("/auth/users"),
 };
 
 // Tasks

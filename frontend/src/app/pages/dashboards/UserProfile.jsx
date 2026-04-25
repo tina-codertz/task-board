@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Save, Eye, EyeOff, ArrowLeft, User, Lock, Shield, CheckCircle, AlertCircle } from 'lucide-react';
-import { authAPI } from '../../api/api';
+import { authAPI } from '../../lib/api';
 
 const ROLE_CONFIG = {
   ADMIN:   { label: 'Admin',   className: 'bg-rose-100 text-rose-700 border border-rose-200'   },

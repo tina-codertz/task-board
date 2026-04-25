@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { LogOut, Users, Trash2 } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { adminAPI, activityLogAPI, taskAPI, teamAPI } from "../../lib/api";
 
@@ -297,56 +297,25 @@ const AdminDashboard = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {teams && teams.length > 0 ? (
                 teams.map(team => (
-                  <div key={team.id} className="bg-white rounded-lg shadow-sm hover:shadow-md transition border border-gray-200 p-6 flex flex-col h-96">
-                    {/* Header */}
-                    <div className="flex justify-between items-start mb-4 flex-shrink-0">
-                      <div className="flex-1 min-w-0">
-                        <h3 className="text-lg font-semibold text-gray-900 truncate">{team.name}</h3>
-                        <p className="text-sm text-gray-600 mt-1 line-clamp-2">{team.description || 'No description'}</p>
+                  <div key={team.id} className="bg-white rounded-lg shadow p-6">
+                    <div className="flex justify-between items-start mb-4">
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-900">{team.name}</h3>
+                        <p className="text-sm text-gray-600 mt-1">{team.description || 'No description'}</p>
                       </div>
                       <button
                         onClick={() => handleDeleteTeam(team.id)}
-                        className="text-red-600 hover:text-red-800 p-2 hover:bg-red-50 rounded-lg transition flex-shrink-0 ml-2"
-                        title="Delete team"
+                        className="text-red-600 hover:text-red-800 text-sm"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        Delete
                       </button>
                     </div>
-
-                    {/* Members Section */}
-                    <div className="mb-4 flex-1 flex flex-col min-h-0">
-                      <div className="flex items-center gap-2 text-sm text-gray-600 mb-3 flex-shrink-0">
-                        <Users className="w-4 h-4" />
-                        <span className="font-medium">{team.members?.length || 0} members</span>
-                      </div>
-                      <div className="flex-1 overflow-y-auto bg-gray-50 rounded-lg p-3 border border-gray-100">
-                        {team.members && team.members.length > 0 ? (
-                          <div className="space-y-2">
-                            {team.members.map(member => (
-                              <div
-                                key={member.id}
-                                className="flex items-start gap-2 text-sm bg-white p-2 rounded border border-gray-200 hover:border-gray-300"
-                              >
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-gray-700 font-medium truncate">{member.user?.name || 'Unknown'}</p>
-                                  <p className="text-xs text-gray-500 truncate">{member.user?.email || '—'}</p>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <div className="h-full flex items-center justify-center text-sm text-gray-500">
-                            No members yet
-                          </div>
-                        )}
-                      </div>
-                    </div>
+                    <p className="text-sm text-gray-600">{team.members?.length || 0} members</p>
                   </div>
                 ))
               ) : (
-                <div className="col-span-full text-center py-12 bg-white rounded-lg border border-gray-200">
-                  <Users className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                  <p className="text-gray-600 font-medium">No teams found</p>
+                <div className="col-span-full text-center py-12 text-gray-500">
+                  No teams found.
                 </div>
               )}
             </div>
