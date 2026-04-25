@@ -202,4 +202,30 @@ export class TeamService {
 
     return teams;
   }
+
+  async getMyTeams(userId: number) {
+    const prisma = this.prisma as any;
+
+    const teams = await prisma.team.findMany({
+      where: {
+        OR: [
+          { ownerId: userId },
+          { members: { some: { userId } } },
+        ],
+      },
+      include: {
+        owner: { select: { id: true, name: true, email: true } },
+        members: { include: { user: { select: { id: true, name: true, email: true } } } },
+        tasks: { 
+          include: {
+            assignedTo: { select: { id: true, name: true } },
+            createdBy: { select: { id: true, name: true } },
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return teams;
+  }
 }

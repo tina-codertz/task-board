@@ -7,6 +7,12 @@ export class TeamController {
   constructor(private readonly teamService: TeamService) {}
 
   @UseGuards(JwtAuthGuard)
+  @Get('owner/my-teams')
+  async getMyTeams(@Request() req: any) {
+    return await this.teamService.getMyTeams(req.user.userId);
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Post()
   async createTeam(@Request() req: any, @Body() createTeamDto: any) {
     return await this.teamService.createTeam(req.user.userId, createTeamDto);
@@ -46,11 +52,5 @@ export class TeamController {
   @Delete(':id/members/:memberId')
   async removeMember(@Param('id') id: string, @Param('memberId') memberId: string, @Request() req: any) {
     return await this.teamService.removeMemberFromTeam(parseInt(id), req.user.userId, parseInt(memberId));
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Get('owner/my-teams')
-  async getMyTeams(@Request() req: any) {
-    return await this.teamService.getTeamsByOwner(req.user.userId);
   }
 }
