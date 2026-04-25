@@ -30,7 +30,7 @@ const TasksTab = ({
           <table className="w-full">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
-                {['Title', 'Description', 'Status', 'Team', 'Actions'].map(col => (
+                {['Title', 'Description', 'Status', 'Team', 'Assigned To', 'Actions'].map(col => (
                   <th key={col} className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
                     {col}
                   </th>
@@ -59,6 +59,7 @@ const TasksTab = ({
                       </span>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-600">{task.team?.name || '—'}</td>
+                    <td className="px-6 py-4 text-sm text-gray-600">{task.assignedTo?.name || '—'}</td>
                     <td className="px-6 py-4 text-sm">
                       <div className="flex gap-2">
                         <button
@@ -90,7 +91,7 @@ const TasksTab = ({
                 ))
               ) : (
                 <tr>
-                  <td colSpan="5" className="px-6 py-8 text-center text-gray-500">
+                  <td colSpan="6" className="px-6 py-8 text-center text-gray-500">
                     No tasks found. Create one to get started!
                   </td>
                 </tr>

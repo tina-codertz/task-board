@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import TaskDetailsModal from '../../components/tasks/TaskDetail';
-import DashboardHeader from '../shared/components/DashboardHeader';
+import CreateTaskModal from '../../components/tasks/CreateTaskModal';
+import Header from '../../components/layout/Header';
 import ManagerTabNav from '../../components/manager/ManagerTabNav';
 import TasksTab from '../../components/manager/TasksTab';
 import TeamsTab from '../../components/manager/TeamsTab';
 import { CreateTeamModal, AddMemberModal } from '../../components/manager/ManagerModal';
 import { ErrorAlert } from '../../components/admin/Alerts';
-import { taskAPI, teamAPI, adminAPI } from '../../api/api';
+import { taskAPI, teamAPI, authAPI } from '../../api/api';
 
 const ManagerDashboard = () => {
   const { user, logout } = useAuth();
@@ -31,7 +31,7 @@ const ManagerDashboard = () => {
       const [teamsData, tasksData, usersData] = await Promise.all([
         teamAPI.getAllTeams(),
         taskAPI.getAllTasks(),
-        adminAPI.getAllUsers(),
+        authAPI.getAllUsers(),
       ]);
       setTeams(teamsData.teams || []);
       setTasks(tasksData.tasks || []);
@@ -120,14 +120,14 @@ const ManagerDashboard = () => {
     } catch (err) { setError(err.message); }
   };
 
-  // ── Derived state ───────────────────────────────────────────────────────────
+  // ── Derived state
   const availableMembers = selectedTeam
     ? users.filter(u => !selectedTeam.members?.some(m => m.userId === u.id))
     : [];
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <DashboardHeader title="Manager Dashboard" userName={user?.name} onLogout={logout} />
+      <Header title="Manager Dashboard" userName={user?.name} onLogout={logout} />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <ErrorAlert message={error} onClose={() => setError('')} />
@@ -158,14 +158,14 @@ const ManagerDashboard = () => {
       </main>
 
       {/* Task Modal */}
-      <TaskDetailsModal
+      <CreateTaskModal
         isOpen={showTaskModal}
         task={editingTask}
         onClose={() => { setShowTaskModal(false); setEditingTask(null); }}
         onSave={editingTask ? handleUpdateTask : handleCreateTask}
         isEditing={!!editingTask}
         teams={teams}
-        users={users.filter(u => u.id !== user?.id)}
+        users={users.filter(u => u.id !== user?.id && u.role === 'USER')}
       />
 
       {/* Team Modals */}

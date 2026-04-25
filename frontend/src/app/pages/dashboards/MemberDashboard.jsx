@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import DashboardHeader from '../shared/components/DashboardHeader';
+import Header from '../../components/layout/Header';
 import TaskStatsGrid   from '../../components/tasks/TaskStatsGrid';
 import StatusFilter    from '../../components/tasks/StatusFilter';
 import TaskList        from '../../components/tasks/TaskList';
@@ -79,7 +79,7 @@ const MemberDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <DashboardHeader title="My Tasks" userName={user?.name} onLogout={logout} />
+      <Header title="My Tasks" userName={user?.name} onLogout={logout} />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <ErrorAlert message={error} onClose={() => setError('')} />

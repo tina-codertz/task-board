@@ -100,9 +100,10 @@ export const UserProfile = () => {
   const role = ROLE_CONFIG[user?.role] ?? ROLE_CONFIG.USER;
 
   // Back destination by role
-  const dashboardPath =
-    user?.role === 'ADMIN'   ? '/admin'   :
-    user?.role === 'MANAGER' ? '/manager' : '/dashboard';
+ const dashboardPath =
+  user?.role === 'ADMIN'   ? '/dashboard/admin' :
+  user?.role === 'MANAGER' ? '/dashboard/manager' :
+                             '/dashboard/member';
 
   return (
     <div className="min-h-screen bg-slate-50 py-10 px-4">
@@ -110,7 +111,7 @@ export const UserProfile = () => {
       {/* Back button */}
       <div className="max-w-xl mx-auto mb-4">
         <button
-          onClick={() => navigate(dashboardPath)}
+          onClick={() => navigate(dashboardPath,{replace:true})}
           className="flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-800 transition-colors group"
         >
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />

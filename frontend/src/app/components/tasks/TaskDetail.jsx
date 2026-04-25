@@ -6,9 +6,18 @@ const STATUS_ACTIONS = [
   { status: 'DONE',        label: '✓ Mark as Done',        borderClass: 'border-green-300',  textClass: 'text-green-700',  hoverClass: 'hover:bg-green-50'  },
 ];
 
-const TaskDetail = ({ task, comments, currentUserId, onStatusChange, onAddComment, onDeleteComment }) => (
-  <div className="bg-white rounded-lg shadow-lg p-6 sticky top-8">
-    <h2 className="text-2xl font-bold text-gray-900 mb-4">{task.title}</h2>
+const TaskDetail = ({ task, comments, currentUserId, onStatusChange, onAddComment, onDeleteComment }) => {
+  if (!task) {
+    return (
+      <div className="bg-white rounded-lg shadow-lg p-6 sticky top-8">
+        <p className="text-center text-gray-500">Select a task to view details</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-white rounded-lg shadow-lg p-6 sticky top-8">
+      <h2 className="text-2xl font-bold text-gray-900 mb-4">{task.title}</h2>
 
     {task.description && (
       <div className="mb-6">
@@ -58,6 +67,7 @@ const TaskDetail = ({ task, comments, currentUserId, onStatusChange, onAddCommen
       canDelete={false}
     />
   </div>
-);
+  );
+};
 
 export default TaskDetail;

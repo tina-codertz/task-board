@@ -20,12 +20,12 @@ const AddUserForm = ({ onSubmit, onCancel, loading }) => {
 
         <Field label="Full Name">
           <input type="text" value={form.name} onChange={set('name')}
-            className={inputCls} placeholder="John Doe" required />
+            className={inputCls} placeholder="Full Name" required />
         </Field>
 
         <Field label="Email">
           <input type="email" value={form.email} onChange={set('email')}
-            className={inputCls} placeholder="john@example.com" required />
+            className={inputCls} placeholder="user@example.com" required />
         </Field>
 
         <Field label="Password">

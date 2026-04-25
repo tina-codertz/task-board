@@ -1,8 +1,10 @@
-import { Users, Plus, Activity } from 'lucide-react';
+import { Users, Plus, Activity, ListTodo, Users2 } from 'lucide-react';
 
 const TABS = [
   { id: 'users',    label: 'Manage Users',   icon: Users    },
   { id: 'add-user', label: 'Add User',        icon: Plus     },
+  { id: 'tasks',    label: 'All Tasks',       icon: ListTodo },
+  { id: 'teams',    label: 'All Teams',       icon: Users2    },
   { id: 'logs',     label: 'Activity Logs',  icon: Activity },
 ];
 
