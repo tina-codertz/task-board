@@ -243,7 +243,7 @@ const MemberDashboard = () => {
           </div>
         )}
 
-        {/* Teams View - Updated with scrollable members */}
+        {/* Teams View */}
         {activeTab === 'teams' && (
           <div className="animate-slide-up">
             {loading ? (
@@ -390,7 +390,7 @@ const TeamCard = ({ team, index }) => {
           </div>
         )}
         
-        {/* Members Section - Scrollable */}
+        {/* Members Section  */}
         <div className="mb-4">
           <div className="flex items-center justify-between mb-2">
             <h4 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
@@ -432,7 +432,7 @@ const TeamCard = ({ team, index }) => {
           )}
         </div>
         
-        {/* Tasks Section - Scrollable */}
+        {/* Tasks Section */}
         <div className="flex-1">
           <div className="flex items-center justify-between mb-2">
             <h4 className="text-sm font-semibold text-gray-700 flex items-center gap-2">

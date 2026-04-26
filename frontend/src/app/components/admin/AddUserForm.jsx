@@ -15,7 +15,7 @@ const AddUserForm = ({ onSubmit, onCancel, loading }) => {
 
   return (
     <div className="bg-white rounded-lg shadow p-6 max-w-2xl">
-      <h2 className="text-lg font-semibold text-gray-900 mb-6">Create New User</h2>
+
       <form onSubmit={handleSubmit} className="space-y-4">
 
         <Field label="Full Name">

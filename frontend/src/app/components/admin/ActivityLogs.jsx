@@ -12,10 +12,7 @@ const getActionBadgeColor = (action) => {
 const ActivityLogsTable = ({ logs }) => (
   <div className="bg-white rounded-lg shadow overflow-hidden">
     <div className="px-6 py-4 border-b border-gray-200">
-      <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-        <Activity className="w-5 h-5" />
-        Activity Logs
-      </h2>
+     
     </div>
 
     {logs.length === 0 ? (

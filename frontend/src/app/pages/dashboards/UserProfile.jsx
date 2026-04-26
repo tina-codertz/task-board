@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import { authAPI } from '../../lib/api';
 
-// ── Role config ───────────────────────────────────────────────────────────────
+// ── Role config
 const ROLE_CONFIG = {
   ADMIN:   { label: 'Admin',   dot: 'bg-rose-500',  pill: 'bg-rose-50 text-rose-700 ring-rose-200'    },
   MANAGER: { label: 'Manager', dot: 'bg-sky-500',   pill: 'bg-sky-50 text-sky-700 ring-sky-200'       },
@@ -18,7 +18,7 @@ const dashboardPath = (role) =>
   role === 'ADMIN'   ? '/dashboard/admin'   :
   role === 'MANAGER' ? '/dashboard/manager' : '/dashboard/member';
 
-// ── Primitives ────────────────────────────────────────────────────────────────
+
 const inputCls = (disabled) =>
   `w-full px-3.5 py-2.5 rounded-xl border text-sm transition-all outline-none font-medium ${
     disabled
@@ -43,7 +43,7 @@ const SectionTitle = ({ icon: Icon, title, aside }) => (
   </div>
 );
 
-// ── Main component ────────────────────────────────────────────────────────────
+// ── Main component 
 export const UserProfile = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
