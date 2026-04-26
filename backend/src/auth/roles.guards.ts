@@ -4,6 +4,7 @@ import { Reflector } from "@nestjs/core";
 
 
 @Injectable()
+// read meta data from decorators
 export class RolesGuard implements CanActivate{
     constructor(private reflector:Reflector){}
 

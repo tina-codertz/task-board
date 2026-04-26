@@ -9,22 +9,22 @@ import { PrismaModule } from '../prisma/prisma.module.js';
 
 @Module({
   imports: [
-    PrismaModule,
-    PassportModule.register({ defaultStrategy: 'jwt' }),
+    PrismaModule, //gives  for DB access
+    PassportModule.register({ defaultStrategy: 'jwt' }), //enables authentication system
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_SECRET') || 'secret',
+        secret: configService.get<string>('JWT_SECRET') ,
         signOptions: { expiresIn: '24h' },
       }),
     }),
   ],
-  controllers: [AuthController],
+  controllers: [AuthController], // use this controller to handle incoming requests related to authentication and user management
   providers: [
     AuthService,
     JwtStrategy,
-  ],
-  exports: [JwtModule, PassportModule],
+  ],// use this service to handle the business logic related to authentication, such as registering new users, validating credentials, and generating JWT tokens. The JwtStrategy is used to define how JWT tokens should be validated and how user information should be extracted from the token.
+  exports: [JwtModule, PassportModule],// export the JwtModule and PassportModule so that they can be used in other modules that import the AuthModule, allowing other parts of the application to use JWT authentication and Passport's authentication features.
 })
 export class AuthModule {}
