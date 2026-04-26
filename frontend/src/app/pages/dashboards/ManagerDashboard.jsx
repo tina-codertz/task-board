@@ -51,7 +51,7 @@ const ManagerDashboard = () => {
         taskAPI.getAllTasks(),
         authAPI.getAllUsers(),
       ]);
-      // Ensure we always set arrays, even if the response is undefined
+      //  set arrays, even if the response is undefined
       setTeams(teamsData?.teams || []);
       setTasks(tasksData?.tasks || []);
       setUsers(usersData?.users || []);
@@ -297,7 +297,7 @@ const ManagerDashboard = () => {
         </div>
       </main>
 
-      {/* Modals with Enhanced UI */}
+      {/* Modals */}
       <CreateTaskModal
         isOpen={showTaskModal}
         task={editingTask}
@@ -315,7 +315,7 @@ const ManagerDashboard = () => {
         currentUserId={user?.id}
       />
 
-      {/* Team Modals with Better Styling */}
+      {/* Team Modals*/}
       {showTeamModal && (
         <CreateTeamModal onClose={() => setShowTeamModal(false)} onSubmit={handleCreateTeam} />
       )}

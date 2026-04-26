@@ -2,7 +2,7 @@ import { Injectable, ForbiddenException, BadRequestException } from '@nestjs/com
 import { PrismaService } from '../prisma/prisma.service.js';
 
 @Injectable()
-export class CommentService {
+export class CommentService {//this class can be injected across the nest app
   constructor(private prisma: PrismaService) {}
 
   async createComment(taskId: number, userId: number, content: string) {
