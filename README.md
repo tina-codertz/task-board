@@ -22,27 +22,41 @@ npm install
 npm run dev
 ```
 
-##  Architecture Diagram
+##  Project Structure
 
 ```text
-+-------------------+       HTTP / REST API      +-----------------------+
-|                   |  <---------------------->  |                       |
-|   Frontend        |                            |   Backend             |
-|   (React, Vite,   |                            |   (NestJS, Passport   |
-|    Tailwind CSS)  |                            |    JWT, Prisma ORM)   |
-|                   |                            |                       |
-+-------------------+                            +-----------------------+
-                                                             ^
-                                                             |
-                                                             | TCP / Prisma
-                                                             v
-                                                 +-----------------------+
-                                                 |                       |
-                                                 |   Database            |
-                                                 |   (PostgreSQL         |
-                                                 |    via Docker)        |
-                                                 |                       |
-                                                 +-----------------------+
+├── frontend/
+│   ├── public/
+│   ├── src/
+│   │   ├── app/
+│   │   │   ├── context/
+│   │   │   ├── components/
+│   │   │   │   ├── tasks/
+│   │   │   │   ├── layout/
+│   │   │   │   ├── admin/
+│   │   │   │   ├── manager/
+│   │   │   ├── lib/
+│   │   │   ├── pages/
+│   │   │   │   ├── auth/
+│   │   │   │   ├── dashboards/
+│   │   │   ├── routes/
+│   │   ├── assets/
+├── backend/
+│   ├── test/
+│   ├── prisma/
+│   │   ├── migrations/
+│   │   │   ├── 20260424190621_add_tasks_comments_logs_and_teams/
+│   │   │   ├── 20260424110411/
+│   │   │   ├── 20260424113928_modifying_table_user/
+│   ├── src/
+│   │   ├── comments/
+│   │   ├── auth/
+│   │   │   ├── dto/
+│   │   ├── prisma/
+│   │   ├── admin/
+│   │   ├── logs/
+│   │   ├── team/
+│   │   ├── task/
 ```
 
 ##  Tech Choices & Why
@@ -83,14 +97,67 @@ The database is seeded with test accounts for each role so you can log in and te
 
 *(Please upload your screenshots below and explain how you solved the errors)*
 
-### Issue 1: [Upload Screenshot Here]
+### Issue 1: Authentication Error
+![Authentication Error](./screenshots/authentication-error(useauth).png)
 **How I solved it:**
 [Explain the debugging process, what caused the issue, and the solution]
 
-### Issue 2: [Upload Screenshot Here]
+### Issue 2: Authorization Errors
+![Authorization Errors](./screenshots/authorization%20erros%20manager%20wanted%20to%20edit%20before%20giving%20him%20the%20permission.png)
 **How I solved it:**
 [Explain the debugging process, what caused the issue, and the solution]
 
-### Issue 3: [Upload Screenshot Here]
+### Issue 3: Database Port Conflict in Dockerization
+![Database Port Conflict](./screenshots/database%20port%20conflict%20in%20dockerization.png)
 **How I solved it:**
 [Explain the debugging process, what caused the issue, and the solution]
+
+### Issue 4: Docker Port Conflicts
+![Docker Port Conflicts](./screenshots/docker-error%20port%20conflicts.png)
+**How I solved it:**
+[Explain the debugging process, what caused the issue, and the solution]
+
+### Issue 5: Failed to Fetch (Frontend)
+![Failed to Fetch](./screenshots/failed%20to%20fetch.png)
+**How I solved it:**
+[Explain the debugging process, what caused the issue, and the solution]
+
+### Issue 6: Failed to Fetch Activity Log
+![Failed to Fetch Activity Log](./screenshots/frontend%20failed%20to%20fetch%20activity%20log.png)
+**How I solved it:**
+[Explain the debugging process, what caused the issue, and the solution]
+
+### Issue 7: Docker Port Mapping Failed
+![Docker Port Mapping Failed](./screenshots/frontend%20port%20failed%20while%20using%20docker%20was%20mapped%20incorrectly.png)
+**How I solved it:**
+[Explain the debugging process, what caused the issue, and the solution]
+
+### Issue 8: Wrong Backend Port after Dockerization
+![Wrong Backend Port](./screenshots/frontend%20was%20hitting%20a%20wrong%20backend%20port%20there%20was%20no%20connection%20with%20the%20backend%20after%20dockerization.png)
+**How I solved it:**
+[Explain the debugging process, what caused the issue, and the solution]
+
+### Issue 9: Typos in Frontend (Backend Title Response)
+![Typos in Frontend](./screenshots/mitypos%20in%20the%20frontend%20as%20backend%20was%20not%20giving%20the%20tittle%20as%20response.png)
+**How I solved it:**
+[Explain the debugging process, what caused the issue, and the solution]
+
+### Issue 10: Unable to Fetch Activity Logs
+![Unable to Fetch Activity Logs](./screenshots/unabale%20to%20fetch%20activity-logs.png)
+**How I solved it:**
+[Explain the debugging process, what caused the issue, and the solution]
+
+### Additional Screenshot 1
+![Screenshot 2026-04-24 at 22.50.30](./screenshots/Screenshot%202026-04-24%20at%2022.50.30.png)
+**Context:**
+[Explain this screenshot]
+
+### Additional Screenshot 2
+![Screenshot 2026-04-25 at 13.10.59](./screenshots/Screenshot%202026-04-25%20at%2013.10.59.png)
+**Context:**
+[Explain this screenshot]
+
+### Additional Screenshot 3
+![Screenshot 2026-04-25 at 19.31.03](./screenshots/Screenshot%202026-04-25%20at%2019.31.03.png)
+**Context:**
+[Explain this screenshot]
