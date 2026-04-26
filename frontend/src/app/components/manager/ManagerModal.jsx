@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { X } from 'lucide-react';
 
-// ── Shared layout ─────────────────────────────────────────────────────────────
+// ── Shared layout 
 const ModalShell = ({ title, onClose, children }) => (
   <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
     <div className="bg-white rounded-lg shadow-2xl max-w-md w-full p-6">
@@ -35,7 +35,7 @@ const ModalActions = ({ onCancel, submitLabel, disabled }) => (
   </div>
 );
 
-// ── CreateTeamModal ───────────────────────────────────────────────────────────
+// ── CreateTeamModal
 export const CreateTeamModal = ({ onClose, onSubmit }) => {
   const [name, setName] = useState('');
 
@@ -66,7 +66,7 @@ export const CreateTeamModal = ({ onClose, onSubmit }) => {
   );
 };
 
-// ── AddMemberModal ────────────────────────────────────────────────────────────
+// ── AddMemberModal 
 export const AddMemberModal = ({ team, availableMembers, onClose, onSubmit }) => {
   const [selectedMember, setSelectedMember] = useState('');
 
@@ -94,7 +94,7 @@ export const AddMemberModal = ({ team, availableMembers, onClose, onSubmit }) =>
             ))}
           </select>
           {availableMembers.length === 0 && (
-            <p className="text-sm text-gray-500 mt-2">All users are already in this team</p>
+            <p className="text-sm text-gray-500 mt-2">Add users</p>
           )}
         </div>
         <ModalActions

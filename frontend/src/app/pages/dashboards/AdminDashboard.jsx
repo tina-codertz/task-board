@@ -267,12 +267,12 @@ const AdminDashboard = () => {
           </div>
         )}
 
-        {/* Enhanced Tab Navigation */}
+        {/* Tab Navigation */}
         <div className="mb-8">
           <TabNav activeTab={activeTab} onTabChange={setActiveTab} />
         </div>
 
-        {/* Tab Content with Enhanced UI */}
+        {/* Tab Content */}
         <div className="mt-6">
           {activeTab === "users" && (
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
