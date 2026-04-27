@@ -13,7 +13,7 @@ cd backend
 npm install
 npx prisma generate
 npx prisma migrate dev
-node prisma/seed.js
+
 npm run start:dev &
 
 # 3. Setup and run the frontend application
@@ -88,9 +88,8 @@ The database is seeded with test accounts for each role so you can log in and te
 | Role | Email | Password |
 | :--- | :--- | :--- |
 | **ADMIN** | `admin@gmail.com` | `admin123` |
-| **MANAGER** | `manager@gmail.com` | `manager123` |
-| **USER** | `user@gmail.com` | `user123` |
-
+ then allow admin to create the manager 
+ for accesing members dashboard just register the account, the  default role is of user(member) 
 ##  Debugging & Handling the Unknown
 
 > *Note from the developer: Below is a space detailing how I approach unknown issues and debug errors encountered during development.*

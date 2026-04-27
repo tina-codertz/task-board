@@ -59,7 +59,7 @@ export function AuthProvider({ children }) {
       const data = await res.json();
 
       if (!res.ok) {
-        console.error(`${errorLabel}: [${res.status}]`, data);
+      
         return null;
       }
 
@@ -68,7 +68,7 @@ export function AuthProvider({ children }) {
 
       return data.user; // return the available user data to the caller (login or register handler)
     } catch (err) {
-      console.error(`${errorLabel}:`, err);
+   
       return null;
     }
   };
@@ -129,7 +129,7 @@ export function AuthProvider({ children }) {
 
       return true;
     } catch (err) {
-      console.error("Role switch error:", err);
+
       return false;
     }
   };

@@ -17,7 +17,7 @@ function App() {
         
 
         <Routes>
-         
+         {/* Public Routes */}
           <Route path="/" element={<AuthPage />} />
 
           {/* User Profile Route */}

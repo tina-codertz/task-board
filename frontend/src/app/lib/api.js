@@ -22,7 +22,7 @@ const get = (path) => request("GET", path);
 const post = (path, body) => request("POST", path, body);
 const patch = (path, body) => request("PATCH", path, body);
 const del = (path) => request("DELETE", path);
-const pub = (path, body) => request("POST", path, body, { public: true });
+const pub = (path, body) => request("POST", path, body, { public: true }); // for public endpoints like login/register
 
 //  Auth
 export const authAPI = {
