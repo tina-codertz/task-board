@@ -160,7 +160,7 @@ export class TeamService {
     return teamMember;
   }
 
-  async removeMemberFromTeam(teamId: number, userId: number, memberId: number) {
+  async removeMemberFromTeam(teamId: number, userId: number, memberUserId: number) {
     const prisma = this.prisma as any;
 
     const team = await prisma.team.findUnique({ where: { id: teamId } });
@@ -171,17 +171,17 @@ export class TeamService {
     }
 
     await prisma.teamMember.delete({
-      where: { teamId_userId: { teamId, userId: memberId } },
+      where: { teamId_userId: { teamId, userId: memberUserId } },
     });
 
     // Log member removal
-    const member = await prisma.user.findUnique({ where: { id: memberId } });
+    const member = await prisma.user.findUnique({ where: { id: memberUserId } });
     await prisma.activityLog.create({
       data: {
         action: 'TEAM_MEMBER_REMOVED',
         description: `${member.name} removed from team "${team.name}"`,
         userId,
-        metadata: { teamId, memberId },
+        metadata: { teamId, memberId: memberUserId },
       },
     });
 
