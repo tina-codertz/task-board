@@ -99,10 +99,10 @@ const ManagerDashboard = () => {
     } catch (err) { setError(err.message); }
   };
 
-  const handleRemoveMember = async (teamId, memberId) => {
+  const handleRemoveMember = async (teamId, userId) => {
     if (!confirm('Remove this member from the team?')) return;
     try {
-      await teamAPI.removeMember(teamId, memberId);
+      await teamAPI.removeMember(teamId, userId);
       fetchData();
     } catch (err) { setError(err.message); }
   };

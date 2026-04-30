@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Mail, Lock, User, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 
-// role → Route mapping
+// role  Route mapping
 const getDashboardRoute = (role) => {
   const normalizedRole = role?.toLowerCase();
   switch (normalizedRole) {
@@ -77,7 +77,7 @@ export default function LoginPage() {
     const user = await login(loginData.email, loginData.password);
 
     if (user) {
-      navigate(getDashboardRoute(user.role)); // role-based redirect
+      navigate(getDashboardRoute(user.role)); // role based redirect
     } else {
       setError("Invalid email or password");
     }
@@ -98,11 +98,11 @@ export default function LoginPage() {
     const user = await register(
       registerData.name,
       registerData.email,
-      registerData.password
+      registerData.password,
     );
 
     if (user) {
-      navigate(getDashboardRoute(user.role)); //  role-based redirect
+      navigate(getDashboardRoute(user.role)); //  role based redirect
     } else {
       setError("Registration failed");
     }
@@ -113,7 +113,6 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-6">
-
         <h1 className="text-2xl font-bold text-center text-gray-800">
           TaskBoard
         </h1>
@@ -158,6 +157,7 @@ export default function LoginPage() {
                 setLoginData({ ...loginData, email: e.target.value })
               }
             />
+           
 
             <PasswordInput
               value={loginData.password}
@@ -194,6 +194,9 @@ export default function LoginPage() {
                 setRegisterData({ ...registerData, email: e.target.value })
               }
             />
+           {registerData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(registerData.email) && (
+              <p className="text-xs text-red-500 mt-1">Invalid email format</p>
+            )}
 
             <PasswordInput
               value={registerData.password}
@@ -202,6 +205,24 @@ export default function LoginPage() {
               }
               placeholder="Password"
             />
+            {registerData.password &&
+              registerData.password.length > 0 &&
+              registerData.password.length < 8 && (
+                <p className="text-xs text-red-500 mt-1">
+                  Password must be at least 8 characters
+                </p>
+              )}
+
+            {registerData.password &&
+              registerData.password.length >= 8 &&
+              !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).*$/.test(
+                registerData.password,
+              ) && (
+                <p className="text-xs text-red-500 mt-1">
+                  Password must include uppercase, lowercase, number, and
+                  special character
+                </p>
+              )}
 
             <PasswordInput
               value={registerData.confirm}

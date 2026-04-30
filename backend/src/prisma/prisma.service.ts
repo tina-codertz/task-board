@@ -1,20 +1,11 @@
-import {
-  Injectable,
-  OnModuleInit,
-  OnModuleDestroy,
-} from '@nestjs/common';
-import * as Prisma from '@prisma/client';
+import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { Pool } from 'pg';
 import * as bcrypt from 'bcrypt';
 
-const { PrismaClient } = Prisma;
-
 @Injectable()
-export class PrismaService
-  extends PrismaClient
-  implements OnModuleInit, OnModuleDestroy
-{
+export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
   private pool: Pool;
 
   constructor() {
@@ -26,33 +17,24 @@ export class PrismaService
       port: url.port ? parseInt(url.port) : 5432,
       database: url.pathname?.slice(1) || '',
       user: url.username || 'postgres',
-      password: decodeURIComponent(url.password) || 'password',
+      password: decodeURIComponent(url.password) || 'password', // decode in case of special chars
     });
 
-    const adapter = new PrismaPg(pool);
+    const adapter = new PrismaPg(pool); 
 
     super({ adapter });
 
     this.pool = pool;
   }
 
+
   async onModuleInit() {
-    await this.$connect();
-    console.log('database is connected');
-    console.log('DATABASE_URL:', process.env.DATABASE_URL);
+  await this.$connect();
+  console.log('database is connected');
+  console.log('DATABASE_URL:', process.env.DATABASE_URL);
 
-    // 👉 create admin on startup
-    await this.createAdminIfNotExists();
-  }
-
-  async onModuleDestroy() {
-    await this.$disconnect();
-    await this.pool.end();
-  }
-
-  // =========================
-  // 🔐 ADMIN AUTO CREATION
-  // =========================
+  await this.createAdminIfNotExists();
+}
   private async createAdminIfNotExists() {
     try {
       const email = 'admin1234@gmail.com';
@@ -80,6 +62,13 @@ export class PrismaService
       console.log('Admin created:', admin.email);
     } catch (error) {
       console.error('Error creating admin:', error);
-    }
+    }}
+  
+
+  async onModuleDestroy() {
+    await this.$disconnect();
+    await this.pool.end();
   }
+  
+  
 }

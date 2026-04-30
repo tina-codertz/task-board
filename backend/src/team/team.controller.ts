@@ -2,6 +2,7 @@ import { Controller, Get, Post, Patch, Delete, Body, Param, UseGuards, Request }
 import { TeamService } from './team.service.js';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 
+
 @Controller('teams')
 export class TeamController {
   constructor(private readonly teamService: TeamService) {}
@@ -37,9 +38,9 @@ export class TeamController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Delete(':id')
-  async deleteTeam(@Param('id') id: string, @Request() req: any) {
-    return await this.teamService.deleteTeam(parseInt(id), req.user.userId);
+  @Delete(':id/members/:memberId')
+  async removeMember(@Param('id') id: string, @Param('memberId') memberId: string, @Request() req: any) {
+    return await this.teamService.removeMemberFromTeam(parseInt(id), req.user.userId, parseInt(memberId));
   }
 
   @UseGuards(JwtAuthGuard)
@@ -48,9 +49,5 @@ export class TeamController {
     return await this.teamService.addMemberToTeam(parseInt(id), req.user.userId, body.userId);
   }
 
-  @UseGuards(JwtAuthGuard)
-  @Delete(':id/members/:memberId')
-  async removeMember(@Param('id') id: string, @Param('memberId') memberId: string, @Request() req: any) {
-    return await this.teamService.removeMemberFromTeam(parseInt(id), req.user.userId, parseInt(memberId));
-  }
+
 }

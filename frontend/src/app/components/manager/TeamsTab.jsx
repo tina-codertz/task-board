@@ -64,12 +64,12 @@ const TeamsTab = ({
                     <div className="space-y-2">
                       {team.members.map(member => (
                         <div
-                          key={member.memberId}
+                          key={member.userId}
                           className="flex justify-between items-center text-sm bg-white p-2 rounded border border-gray-200 hover:border-gray-300"
                         >
                           <span className="text-gray-700 font-medium truncate">{member.user?.name || 'Unknown'}</span>
                           <button
-                            onClick={() => onRemoveMember(team.id, member.memberId)}
+                            onClick={() => onRemoveMember(team.id, member.userId)}
                             className="text-red-600 hover:text-red-800 p-1 hover:bg-red-50 rounded transition flex-shrink-0 ml-2"
                             title="Remove member"
                           >
