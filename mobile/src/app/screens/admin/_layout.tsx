@@ -1,0 +1,19 @@
+import React from "react";
+import { Stack } from "expo-router";
+
+export default function AdminLayout() {
+  return (
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        animationEnabled: true,
+      }}
+    >
+      <Stack.Screen name="dashboard" options={{ title: "Admin Dashboard" }} />
+      <Stack.Screen name="manage-users" options={{ title: "Manage Users" }} />
+      <Stack.Screen name="view-tasks" options={{ title: "View Tasks" }} />
+      <Stack.Screen name="view-team" options={{ title: "View Teams" }} />
+      <Stack.Screen name="activity-logs" options={{ title: "Activity Logs" }} />
+    </Stack>
+  );
+}
