@@ -28,13 +28,15 @@ async function bootstrap() {
   );
 
   //  CORS
-  const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:5173')
+  const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:5173,http://localhost:8000')
     .split(',')
     .map(origin => origin.trim());
 
   app.enableCors({
     origin: allowedOrigins,
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
   const port = process.env.PORT ?? 3002;

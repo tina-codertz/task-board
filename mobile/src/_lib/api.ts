@@ -1,6 +1,9 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const API_BASE_URL = "http://localhost:8000/api";
+// For Expo Go on physical device, use your machine's local IP address
+// Find your IP: On Mac, run: ipconfig getifaddr en0
+// Replace 192.168.1.6 with your actual local IP address
+const API_BASE_URL = "http://192.168.1.6:8000/api"; // Update this IP to your machine's local IP
 
 // Login user
 export async function loginUser(email: string, password: string) {
