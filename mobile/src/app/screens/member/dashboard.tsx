@@ -1,52 +1,180 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
-  TouchableOpacity,
   StyleSheet,
-  SafeAreaView,
+  ScrollView,
+  RefreshControl,
 } from "react-native";
-import { useRouter } from "expo-router";
 import { useAuth } from "../../../_context/AuthContext";
+import { taskAPI } from "../../../_lib/services";
+import StatCard from "../../../components/StatCard";
+import TabBar from "../../../components/TabBar";
+import TaskListItem from "../../../components/TaskListItem";
+import Loading from "../../../components/Loading";
+import Error from "../../../components/Error";
+import EmptyState from "../../../components/EmptyState";
+
+interface Stats {
+  myTasks: number;
+  completedTasks: number;
+  inProgressTasks: number;
+  todoTasks: number;
+}
+
+interface Task {
+  id: number;
+  title: string;
+  description: string;
+  status: string;
+  priority: string;
+  dueDate?: string;
+}
 
 export default function MemberDashboardScreen() {
-  const router = useRouter();
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState("overview");
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  async function handleLogout() {
-    await logout();
+  const [stats, setStats] = useState<Stats>({
+    myTasks: 0,
+    completedTasks: 0,
+    inProgressTasks: 0,
+    todoTasks: 0,
+  });
+
+  const [tasks, setTasks] = useState<Task[]>([]);
+
+  const tabs = [
+    { id: "overview", label: "Overview" },
+    { id: "tasks", label: "My Tasks" },
+  ];
+
+  const fetchData = async () => {
+    try {
+      setError(null);
+      setLoading(true);
+
+      // Fetch member's assigned tasks
+      const tasksData = await taskAPI.getAssignedTasks();
+      const tasksList = tasksData.tasks || [];
+
+      // Calculate stats
+      setStats({
+        myTasks: tasksList.length,
+        completedTasks: tasksList.filter((t: Task) => t.status === "COMPLETED").length,
+        inProgressTasks: tasksList.filter((t: Task) => t.status === "IN_PROGRESS").length,
+        todoTasks: tasksList.filter((t: Task) => t.status === "TODO").length,
+      });
+
+      setTasks(tasksList);
+    } catch (err: any) {
+      setError(err?.message || "Failed to fetch data");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchData();
+    setRefreshing(false);
+  };
+
+  if (loading) {
+    return <Loading message="Loading Dashboard..." />;
+  }
+
+  if (error) {
+    return (
+      <View style={styles.container}>
+        <Error message={error} />
+      </View>
+    );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
+      {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Member Dashboard</Text>
-        <TouchableOpacity
-          style={styles.logoutButton}
-          onPress={handleLogout}
-        >
-          <Text style={styles.logoutText}>Logout</Text>
-        </TouchableOpacity>
+        <Text style={styles.greeting}>Welcome, {user?.name}</Text>
+        <Text style={styles.role}>Team Member</Text>
       </View>
 
-      <View style={styles.userInfo}>
-        <Text style={styles.userLabel}>Logged in as:</Text>
-        <Text style={styles.userName}>{user?.name}</Text>
-        <Text style={styles.userRole}>{user?.role}</Text>
-      </View>
+      {/* Tab Bar */}
+      <TabBar tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
 
-      <View style={styles.content}>
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>My Tasks</Text>
-          <Text style={styles.cardDescription}>View your assigned tasks</Text>
-        </View>
+      {/* Content */}
+      <ScrollView
+        style={styles.content}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
+        {/* Overview Tab */}
+        {activeTab === "overview" && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Your Tasks</Text>
+            <StatCard
+              title="Total Tasks"
+              value={stats.myTasks}
+              icon="checkbox-multiple-outline"
+              color="#007AFF"
+            />
+            <StatCard
+              title="Completed"
+              value={stats.completedTasks}
+              icon="checkbox-marked-circle"
+              color="#4CAF50"
+            />
+            <StatCard
+              title="In Progress"
+              value={stats.inProgressTasks}
+              icon="progress-clock"
+              color="#FF9800"
+            />
+            <StatCard
+              title="To Do"
+              value={stats.todoTasks}
+              icon="clipboard-list-outline"
+              color="#9C27B0"
+            />
+          </View>
+        )}
 
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Team Information</Text>
-          <Text style={styles.cardDescription}>See your team details</Text>
-        </View>
-      </View>
-    </SafeAreaView>
+        {/* Tasks Tab */}
+        {activeTab === "tasks" && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>My Tasks</Text>
+            {tasks.length > 0 ? (
+              tasks.map((task) => (
+                <TaskListItem
+                  key={task.id}
+                  id={task.id}
+                  title={task.title}
+                  description={task.description}
+                  status={task.status}
+                  priority={task.priority}
+                  dueDate={task.dueDate}
+                />
+              ))
+            ) : (
+              <EmptyState
+                icon="checkbox-multiple-outline"
+                title="No Tasks"
+                message="You don't have any tasks assigned yet"
+              />
+            )}
+          </View>
+        )}
+      </ScrollView>
+    </View>
   );
 }
 
@@ -56,73 +184,31 @@ const styles = StyleSheet.create({
     backgroundColor: "#f5f5f5",
   },
   header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    backgroundColor: "#4CAF50",
     paddingHorizontal: 20,
     paddingVertical: 16,
-    backgroundColor: "#fff",
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
+    paddingTop: 20,
   },
-  title: {
+  greeting: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#000",
-  },
-  logoutButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    backgroundColor: "#f44",
-    borderRadius: 6,
-  },
-  logoutText: {
     color: "#fff",
-    fontSize: 12,
-    fontWeight: "600",
   },
-  userInfo: {
-    backgroundColor: "#fff",
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
-  },
-  userLabel: {
-    fontSize: 12,
-    color: "#666",
-    marginBottom: 4,
-  },
-  userName: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#000",
-    marginBottom: 2,
-  },
-  userRole: {
+  role: {
     fontSize: 14,
-    color: "#007AFF",
-    fontWeight: "500",
+    color: "rgba(255, 255, 255, 0.8)",
+    marginTop: 4,
   },
   content: {
-    padding: 16,
-    gap: 12,
+    flex: 1,
   },
-  card: {
-    backgroundColor: "#fff",
+  section: {
     padding: 16,
-    borderRadius: 8,
-    borderLeftWidth: 4,
-    borderLeftColor: "#FF9500",
   },
-  cardTitle: {
-    fontSize: 16,
-    fontWeight: "600",
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
     color: "#000",
-    marginBottom: 4,
-  },
-  cardDescription: {
-    fontSize: 12,
-    color: "#666",
+    marginBottom: 16,
   },
 });
