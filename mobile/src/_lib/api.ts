@@ -5,6 +5,39 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 // Replace 192.168.1.6 with your actual local IP address
 const API_BASE_URL = "http://192.168.1.6:8000/api"; // Update this IP to your machine's local IP
 
+// Safe AsyncStorage wrapper with error handling
+const safeAsyncStorage = {
+  async setItem(key: string, value: string) {
+    try {
+      if (AsyncStorage && AsyncStorage.setItem) {
+        await AsyncStorage.setItem(key, value);
+      }
+    } catch (error) {
+      console.warn(`Failed to save ${key} to AsyncStorage:`, error);
+      // Silently fail - don't break auth flow
+    }
+  },
+  async getItem(key: string) {
+    try {
+      if (AsyncStorage && AsyncStorage.getItem) {
+        return await AsyncStorage.getItem(key);
+      }
+    } catch (error) {
+      console.warn(`Failed to get ${key} from AsyncStorage:`, error);
+      return null;
+    }
+  },
+  async removeItem(key: string) {
+    try {
+      if (AsyncStorage && AsyncStorage.removeItem) {
+        await AsyncStorage.removeItem(key);
+      }
+    } catch (error) {
+      console.warn(`Failed to remove ${key} from AsyncStorage:`, error);
+    }
+  },
+};
+
 // Login user
 export async function loginUser(email: string, password: string) {
   try {
@@ -24,8 +57,8 @@ export async function loginUser(email: string, password: string) {
     const data = await response.json();
     // Store token and user data
     if (data.access_token) {
-      await AsyncStorage.setItem("token", data.access_token);
-      await AsyncStorage.setItem("user", JSON.stringify(data.user));
+      await safeAsyncStorage.setItem("token", data.access_token);
+      await safeAsyncStorage.setItem("user", JSON.stringify(data.user));
     }
     return data;
   } catch (error) {
@@ -57,8 +90,8 @@ export async function registerUser(
     const data = await response.json();
     // Store token and user data
     if (data.access_token) {
-      await AsyncStorage.setItem("token", data.access_token);
-      await AsyncStorage.setItem("user", JSON.stringify(data.user));
+      await safeAsyncStorage.setItem("token", data.access_token);
+      await safeAsyncStorage.setItem("user", JSON.stringify(data.user));
     }
     return data;
   } catch (error) {
@@ -92,43 +125,24 @@ export async function getUserProfile(token: string) {
 // Logout user
 export async function logoutUser() {
   try {
-    await AsyncStorage.removeItem("token");
-    await AsyncStorage.removeItem("user");
+    await safeAsyncStorage.removeItem("token");
+    await safeAsyncStorage.removeItem("user");
   } catch (error) {
-    // Gracefully handle AsyncStorage errors during logout
-    if (error instanceof Error && error.message.includes("Native module")) {
-      console.warn("AsyncStorage not ready during logout");
-      return;
-    }
     console.error("Logout error:", error);
-    throw error;
   }
 }
 
 // Get token from storage
 export async function getToken() {
-  try {
-    return await AsyncStorage.getItem("token");
-  } catch (error) {
-    if (error instanceof Error && error.message.includes("Native module")) {
-      // AsyncStorage not ready on initial load - this is expected
-      return null;
-    }
-    console.error("Get token error:", error);
-    return null;
-  }
+  return await safeAsyncStorage.getItem("token");
 }
 
 // Get user from storage
 export async function getStoredUser() {
   try {
-    const user = await AsyncStorage.getItem("user");
+    const user = await safeAsyncStorage.getItem("user");
     return user ? JSON.parse(user) : null;
   } catch (error) {
-    if (error instanceof Error && error.message.includes("Native module")) {
-      // AsyncStorage not ready on initial load - this is expected
-      return null;
-    }
     console.error("Get user error:", error);
     return null;
   }
