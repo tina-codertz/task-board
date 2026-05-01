@@ -37,7 +37,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // AsyncStorage needs time to set up before first access
     const timer = setTimeout(() => {
       initializeAuth();
-    }, 500);
+    }, 1000);
     
     return () => clearTimeout(timer);
   }, []);

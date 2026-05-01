@@ -15,6 +15,7 @@ import TaskListItem from "../../../components/TaskListItem";
 import Loading from "../../../components/Loading";
 import Error from "../../../components/Error";
 import EmptyState from "../../../components/EmptyState";
+import DashboardHeader from "../../../components/DashboardHeader";
 
 interface Stats {
   totalUsers: number;
@@ -134,11 +135,12 @@ export default function AdminDashboardScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.greeting}>Welcome, {user?.name}</Text>
-        <Text style={styles.role}>Administrator</Text>
-      </View>
+      {/* Header with Logout */}
+      <DashboardHeader
+        title="Administrator"
+        backgroundColor="#007AFF"
+        role="ADMIN"
+      />
 
       {/* Tab Bar */}
       <TabBar tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />

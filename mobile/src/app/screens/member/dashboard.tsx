@@ -14,6 +14,7 @@ import TaskListItem from "../../../components/TaskListItem";
 import Loading from "../../../components/Loading";
 import Error from "../../../components/Error";
 import EmptyState from "../../../components/EmptyState";
+import DashboardHeader from "../../../components/DashboardHeader";
 
 interface Stats {
   myTasks: number;
@@ -101,11 +102,12 @@ export default function MemberDashboardScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.greeting}>Welcome, {user?.name}</Text>
-        <Text style={styles.role}>Team Member</Text>
-      </View>
+      {/* Header with Logout */}
+      <DashboardHeader
+        title="Member"
+        backgroundColor="#4CAF50"
+        role="USER"
+      />
 
       {/* Tab Bar */}
       <TabBar tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />

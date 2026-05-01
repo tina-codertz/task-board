@@ -35,7 +35,7 @@ function RootLayoutNav() {
         }
       }
     }
-  }, [isAuthenticated, isLoading, user, segments]);
+  }, [isAuthenticated, isLoading, user?.role, segments]);
 
   if (isLoading) {
     return (

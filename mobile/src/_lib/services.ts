@@ -12,12 +12,18 @@ async function authenticatedFetch(endpoint: string, options: RequestInit = {}) {
 
   if (token) {
     headers.Authorization = `Bearer ${token}`;
+  } else {
+    console.warn(`[API] No token available for ${endpoint}`);
   }
 
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
     ...options,
     headers,
   });
+
+  if (response.status === 401) {
+    console.error(`[API] Unauthorized response from ${endpoint}. Token: ${token ? "present" : "missing"}`);
+  }
 
   if (!response.ok) {
     const error = await response.json();

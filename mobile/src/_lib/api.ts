@@ -5,6 +5,10 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 // Replace 192.168.1.6 with your actual local IP address
 const API_BASE_URL = "http://192.168.1.6:8000/api"; // Update this IP to your machine's local IP
 
+// In-memory token storage for immediate access
+let memoryToken: string | null = null;
+let memoryUser: any | null = null;
+
 // Safe AsyncStorage wrapper with error handling
 const safeAsyncStorage = {
   async setItem(key: string, value: string) {
@@ -13,8 +17,8 @@ const safeAsyncStorage = {
         await AsyncStorage.setItem(key, value);
       }
     } catch (error) {
-      console.warn(`Failed to save ${key} to AsyncStorage:`, error);
       // Silently fail - don't break auth flow
+      // AsyncStorage may not be available during development startup
     }
   },
   async getItem(key: string) {
@@ -23,7 +27,7 @@ const safeAsyncStorage = {
         return await AsyncStorage.getItem(key);
       }
     } catch (error) {
-      console.warn(`Failed to get ${key} from AsyncStorage:`, error);
+      // Return null on error - auth will continue without stored session
       return null;
     }
   },
@@ -33,7 +37,7 @@ const safeAsyncStorage = {
         await AsyncStorage.removeItem(key);
       }
     } catch (error) {
-      console.warn(`Failed to remove ${key} from AsyncStorage:`, error);
+      // Silently fail - logout will still complete
     }
   },
 };
@@ -55,10 +59,15 @@ export async function loginUser(email: string, password: string) {
     }
 
     const data = await response.json();
-    // Store token and user data
+    // Store token and user data - both in memory and AsyncStorage
     if (data.access_token) {
-      await safeAsyncStorage.setItem("token", data.access_token);
-      await safeAsyncStorage.setItem("user", JSON.stringify(data.user));
+      // Store in memory for immediate access
+      memoryToken = data.access_token;
+      memoryUser = data.user;
+      
+      // Sync to AsyncStorage asynchronously
+      safeAsyncStorage.setItem("token", data.access_token);
+      safeAsyncStorage.setItem("user", JSON.stringify(data.user));
     }
     return data;
   } catch (error) {
@@ -88,10 +97,15 @@ export async function registerUser(
     }
 
     const data = await response.json();
-    // Store token and user data
+    // Store token and user data - both in memory and AsyncStorage
     if (data.access_token) {
-      await safeAsyncStorage.setItem("token", data.access_token);
-      await safeAsyncStorage.setItem("user", JSON.stringify(data.user));
+      // Store in memory for immediate access
+      memoryToken = data.access_token;
+      memoryUser = data.user;
+      
+      // Sync to AsyncStorage asynchronously
+      safeAsyncStorage.setItem("token", data.access_token);
+      safeAsyncStorage.setItem("user", JSON.stringify(data.user));
     }
     return data;
   } catch (error) {
@@ -125,6 +139,11 @@ export async function getUserProfile(token: string) {
 // Logout user
 export async function logoutUser() {
   try {
+    // Clear memory first
+    memoryToken = null;
+    memoryUser = null;
+    
+    // Clear AsyncStorage
     await safeAsyncStorage.removeItem("token");
     await safeAsyncStorage.removeItem("user");
   } catch (error) {
@@ -132,16 +151,30 @@ export async function logoutUser() {
   }
 }
 
-// Get token from storage
+// Get token from storage - check memory first for immediate access
 export async function getToken() {
-  return await safeAsyncStorage.getItem("token");
+  if (memoryToken) {
+    return memoryToken;
+  }
+  const token = await safeAsyncStorage.getItem("token");
+  if (token) {
+    memoryToken = token;
+  }
+  return token;
 }
 
-// Get user from storage
+// Get user from storage - check memory first for immediate access
 export async function getStoredUser() {
   try {
+    if (memoryUser) {
+      return memoryUser;
+    }
     const user = await safeAsyncStorage.getItem("user");
-    return user ? JSON.parse(user) : null;
+    if (user) {
+      memoryUser = JSON.parse(user);
+      return memoryUser;
+    }
+    return null;
   } catch (error) {
     console.error("Get user error:", error);
     return null;
