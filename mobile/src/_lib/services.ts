@@ -60,6 +60,12 @@ export const adminAPI = {
   async getActivityLogs() {
     return authenticatedFetch("/activity-logs");
   },
+
+  async deleteUser(id: number) {
+    return authenticatedFetch(`/admin/users/${id}`, {
+      method: "DELETE",
+    });
+  },
 };
 
 // Task APIs
@@ -162,6 +168,12 @@ export const teamAPI = {
     return authenticatedFetch(`/teams/${teamId}/members`, {
       method: "POST",
       body: JSON.stringify({ memberId }),
+    });
+  },
+
+  async deleteTeam(id: number) {
+    return authenticatedFetch(`/teams/${id}`, {
+      method: "DELETE",
     });
   },
 };

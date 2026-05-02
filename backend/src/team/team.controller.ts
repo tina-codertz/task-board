@@ -36,6 +36,11 @@ export class TeamController {
   async updateTeam(@Param('id') id: string, @Request() req: any, @Body() updateTeamDto: any) {
     return await this.teamService.updateTeam(parseInt(id), req.user.userId, updateTeamDto);
   }
+  @UseGuards(JwtAuthGuard)
+  @Delete(':id')
+  async deleteTeam(@Param('id') id: string, @Request() req: any) {
+    return await this.teamService.deleteTeam(parseInt(id), req.user.userId);
+  }
 
   @UseGuards(JwtAuthGuard)
   @Delete(':id/members/:memberId')

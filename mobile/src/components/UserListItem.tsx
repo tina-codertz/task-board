@@ -8,6 +8,7 @@ interface UserListItemProps {
   email: string;
   role: string;
   onPress?: () => void;
+  onDelete?: () => void;
 }
 
 export default function UserListItem({
@@ -16,6 +17,7 @@ export default function UserListItem({
   email,
   role,
   onPress,
+  onDelete,
 }: UserListItemProps) {
   const getRoleColor = (role: string) => {
     switch (role) {
@@ -67,6 +69,11 @@ export default function UserListItem({
           {role}
         </Text>
       </View>
+      {onDelete && (
+        <TouchableOpacity style={styles.deleteButton} onPress={onDelete}>
+          <MaterialCommunityIcons name="delete" size={20} color="#f44" />
+        </TouchableOpacity>
+      )}
     </TouchableOpacity>
   );
 }
@@ -115,5 +122,9 @@ const styles = StyleSheet.create({
   roleText: {
     fontSize: 11,
     fontWeight: "600",
+  },
+  deleteButton: {
+    marginLeft: 8,
+    padding: 4,
   },
 });

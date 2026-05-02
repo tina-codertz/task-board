@@ -11,6 +11,7 @@ interface TaskListItemProps {
   assignee?: string;
   dueDate?: string;
   onPress?: () => void;
+  onDelete?: () => void;
 }
 
 export default function TaskListItem({
@@ -22,6 +23,7 @@ export default function TaskListItem({
   assignee,
   dueDate,
   onPress,
+  onDelete,
 }: TaskListItemProps) {
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -64,20 +66,27 @@ export default function TaskListItem({
           <Text style={styles.title} numberOfLines={1}>
             {title}
           </Text>
-          <View
-            style={[
-              styles.priorityBadge,
-              { backgroundColor: getPriorityColor(priority) + "20" },
-            ]}
-          >
-            <Text
+          <View style={styles.badgesContainer}>
+            <View
               style={[
-                styles.priorityText,
-                { color: getPriorityColor(priority) },
+                styles.priorityBadge,
+                { backgroundColor: getPriorityColor(priority) + "20" },
               ]}
             >
-              {priority}
-            </Text>
+              <Text
+                style={[
+                  styles.priorityText,
+                  { color: getPriorityColor(priority) },
+                ]}
+              >
+                {priority}
+              </Text>
+            </View>
+            {onDelete && (
+              <TouchableOpacity style={styles.deleteButton} onPress={onDelete}>
+                <MaterialCommunityIcons name="delete" size={18} color="#f44" />
+              </TouchableOpacity>
+            )}
           </View>
         </View>
         {description && (
@@ -177,5 +186,13 @@ const styles = StyleSheet.create({
   footerText: {
     fontSize: 11,
     color: "#999",
+  },
+  badgesContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  deleteButton: {
+    marginLeft: 8,
+    padding: 2,
   },
 });

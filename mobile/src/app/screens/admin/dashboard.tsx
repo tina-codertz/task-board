@@ -6,6 +6,7 @@ import {
   ScrollView,
   RefreshControl,
   TouchableOpacity,
+  Alert,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useAuth } from "../../../_context/AuthContext";
@@ -125,6 +126,60 @@ export default function AdminDashboardScreen() {
     setRefreshing(false);
   };
 
+  const handleDeleteUser = (id: number, name: string) => {
+    Alert.alert("Delete User", `Are you sure you want to delete ${name}?`, [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await adminAPI.deleteUser(id);
+            fetchData();
+          } catch (err: any) {
+            Alert.alert("Error", err.message || "Failed to delete user");
+          }
+        },
+      },
+    ]);
+  };
+
+  const handleDeleteTask = (id: number, title: string) => {
+    Alert.alert("Delete Task", `Are you sure you want to delete "${title}"?`, [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await taskAPI.deleteTask(id);
+            fetchData();
+          } catch (err: any) {
+            Alert.alert("Error", err.message || "Failed to delete task");
+          }
+        },
+      },
+    ]);
+  };
+
+  const handleDeleteTeam = (id: number, name: string) => {
+    Alert.alert("Delete Team", `Are you sure you want to delete team "${name}"?`, [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await teamAPI.deleteTeam(id);
+            fetchData();
+          } catch (err: any) {
+            Alert.alert("Error", err.message || "Failed to delete team");
+          }
+        },
+      },
+    ]);
+  };
+
   if (loading) {
     return <Loading message="Loading Dashboard..." />;
   }
@@ -226,6 +281,7 @@ export default function AdminDashboardScreen() {
                   name={user.name}
                   email={user.email}
                   role={user.role}
+                  onDelete={() => handleDeleteUser(user.id, user.name)}
                 />
               ))
             ) : (
@@ -251,6 +307,7 @@ export default function AdminDashboardScreen() {
                   description={task.description}
                   status={task.status}
                   priority={task.priority}
+                  onDelete={() => handleDeleteTask(task.id, task.title)}
                 />
               ))
             ) : (
@@ -276,27 +333,35 @@ export default function AdminDashboardScreen() {
                       {team.description}
                     </Text>
                   )}
-                  <View style={styles.teamStats}>
-                    <View style={styles.statItem}>
-                      <MaterialCommunityIcons 
-                        name="account-multiple" 
-                        size={14} 
-                        color="#666" 
-                      />
-                      <Text style={styles.statText}>
-                        {team.members?.length || 0} Members
-                      </Text>
+                  <View style={styles.teamStatsContainer}>
+                    <View style={styles.teamStats}>
+                      <View style={styles.statItem}>
+                        <MaterialCommunityIcons 
+                          name="account-multiple" 
+                          size={14} 
+                          color="#666" 
+                        />
+                        <Text style={styles.statText}>
+                          {team.members?.length || 0} Members
+                        </Text>
+                      </View>
+                      <View style={styles.statItem}>
+                        <MaterialCommunityIcons 
+                          name="checkbox-multiple-marked" 
+                          size={14} 
+                          color="#666" 
+                        />
+                        <Text style={styles.statText}>
+                          {team.tasks?.length || 0} Tasks
+                        </Text>
+                      </View>
                     </View>
-                    <View style={styles.statItem}>
-                      <MaterialCommunityIcons 
-                        name="checkbox-multiple-marked" 
-                        size={14} 
-                        color="#666" 
-                      />
-                      <Text style={styles.statText}>
-                        {team.tasks?.length || 0} Tasks
-                      </Text>
-                    </View>
+                    <TouchableOpacity
+                      style={styles.deleteButton}
+                      onPress={() => handleDeleteTeam(team.id, team.name)}
+                    >
+                      <MaterialCommunityIcons name="delete" size={20} color="#f44" />
+                    </TouchableOpacity>
                   </View>
                 </View>
               ))
@@ -398,10 +463,15 @@ const styles = StyleSheet.create({
     color: "#999",
     marginTop: 4,
   },
+  teamStatsContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 8,
+  },
   teamStats: {
     flexDirection: "row",
     gap: 12,
-    marginTop: 8,
   },
   statItem: {
     flexDirection: "row",
@@ -411,5 +481,8 @@ const styles = StyleSheet.create({
   statText: {
     fontSize: 12,
     color: "#666",
+  },
+  deleteButton: {
+    padding: 4,
   },
 });
