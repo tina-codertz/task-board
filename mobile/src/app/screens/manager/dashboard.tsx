@@ -5,16 +5,19 @@ import {
   StyleSheet,
   ScrollView,
   RefreshControl,
+  TouchableOpacity,
 } from "react-native";
+import { useRouter } from "expo-router";
 import { useAuth } from "../../../_context/AuthContext";
 import { taskAPI, teamAPI } from "../../../_lib/services";
 import StatCard from "../../../components/StatCard";
-import TabBar from "../../../components/TabBar";
+import BottomTabBar from "../../../components/BottomTabBar";
 import TaskListItem from "../../../components/TaskListItem";
 import Loading from "../../../components/Loading";
 import Error from "../../../components/Error";
 import EmptyState from "../../../components/EmptyState";
 import DashboardHeader from "../../../components/DashboardHeader";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 interface Stats {
   myTasks: number;
@@ -32,6 +35,7 @@ interface Task {
 }
 
 export default function ManagerDashboardScreen() {
+  const router = useRouter();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("overview");
   const [loading, setLoading] = useState(true);
@@ -48,9 +52,9 @@ export default function ManagerDashboardScreen() {
   const [tasks, setTasks] = useState<Task[]>([]);
 
   const tabs = [
-    { id: "overview", label: "Overview" },
-    { id: "tasks", label: "My Tasks" },
-    { id: "team", label: "My Team" },
+    { id: "overview", label: "Overview", icon: "home" },
+    { id: "tasks", label: "My Tasks", icon: "checkbox-multiple-marked" },
+    { id: "team", label: "My Team", icon: "people" },
   ];
 
   const fetchData = async () => {
@@ -109,8 +113,23 @@ export default function ManagerDashboardScreen() {
         role="MANAGER"
       />
 
-      {/* Tab Bar */}
-      <TabBar tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
+      {/* Action Buttons */}
+      <View style={styles.actionButtonsContainer}>
+        <TouchableOpacity
+          style={styles.actionButton}
+          onPress={() => router.push("/screens/manager/create-task")}
+        >
+          <MaterialCommunityIcons name="plus" size={18} color="#fff" />
+          <Text style={styles.actionButtonText}>Create Task</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.actionButton}
+          onPress={() => router.push("/screens/manager/create-team")}
+        >
+          <MaterialCommunityIcons name="account-multiple-plus" size={18} color="#fff" />
+          <Text style={styles.actionButtonText}>Create Team</Text>
+        </TouchableOpacity>
+      </View>
 
       {/* Content */}
       <ScrollView
@@ -175,6 +194,14 @@ export default function ManagerDashboardScreen() {
           </View>
         )}
       </ScrollView>
+
+      {/* Bottom Tab Bar */}
+      <BottomTabBar
+        tabs={tabs}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        color="#FF9800"
+      />
     </View>
   );
 }
@@ -199,6 +226,31 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "rgba(255, 255, 255, 0.8)",
     marginTop: 4,
+  },
+  actionButtonsContainer: {
+    flexDirection: "row",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    gap: 8,
+    backgroundColor: "#fff",
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+  },
+  actionButton: {
+    flex: 1,
+    flexDirection: "row",
+    backgroundColor: "#FF9800",
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+  },
+  actionButtonText: {
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "600",
   },
   content: {
     flex: 1,

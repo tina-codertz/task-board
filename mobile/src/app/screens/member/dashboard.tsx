@@ -9,7 +9,7 @@ import {
 import { useAuth } from "../../../_context/AuthContext";
 import { taskAPI } from "../../../_lib/services";
 import StatCard from "../../../components/StatCard";
-import TabBar from "../../../components/TabBar";
+import BottomTabBar from "../../../components/BottomTabBar";
 import TaskListItem from "../../../components/TaskListItem";
 import Loading from "../../../components/Loading";
 import Error from "../../../components/Error";
@@ -49,8 +49,8 @@ export default function MemberDashboardScreen() {
   const [tasks, setTasks] = useState<Task[]>([]);
 
   const tabs = [
-    { id: "overview", label: "Overview" },
-    { id: "tasks", label: "My Tasks" },
+    { id: "overview", label: "Overview", icon: "home" },
+    { id: "tasks", label: "My Tasks", icon: "checkbox-multiple-marked" },
   ];
 
   const fetchData = async () => {
@@ -108,9 +108,6 @@ export default function MemberDashboardScreen() {
         backgroundColor="#4CAF50"
         role="USER"
       />
-
-      {/* Tab Bar */}
-      <TabBar tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
 
       {/* Content */}
       <ScrollView
@@ -176,6 +173,14 @@ export default function MemberDashboardScreen() {
           </View>
         )}
       </ScrollView>
+
+      {/* Bottom Tab Bar */}
+      <BottomTabBar
+        tabs={tabs}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        color="#4CAF50"
+      />
     </View>
   );
 }

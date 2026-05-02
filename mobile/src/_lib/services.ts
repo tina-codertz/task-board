@@ -49,6 +49,17 @@ export const adminAPI = {
       body: JSON.stringify(userData),
     });
   },
+
+  async updateUserRole(id: number, role: string) {
+    return authenticatedFetch(`/admin/users/${id}/role`, {
+      method: "PATCH",
+      body: JSON.stringify({ role }),
+    });
+  },
+
+  async getActivityLogs() {
+    return authenticatedFetch("/activity-logs");
+  },
 };
 
 // Task APIs
