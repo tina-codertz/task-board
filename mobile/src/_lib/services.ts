@@ -1,6 +1,6 @@
 import { getToken } from "./api";
 
-const API_BASE_URL = "http://192.168.1.6:8000/api";
+const API_BASE_URL = "http://192.168.1.8:8000/api";
 
 // Helper function to make authenticated requests
 async function authenticatedFetch(endpoint: string, options: RequestInit = {}) {
