@@ -77,6 +77,23 @@ export class TaskService {
     return tasks;
   }
 
+  async getTasksCreatedByMe(userId: number) {
+    const prisma = this.prisma as any;
+
+    const tasks = await prisma.task.findMany({
+      where: { createdById: userId },
+      include: {
+        createdBy: { select: { id: true, name: true, email: true } },
+        assignedTo: { select: { id: true, name: true, email: true } },
+        team: true,
+        comments: { include: { user: { select: { id: true, name: true } } } },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return tasks;
+  }
+
   async getTaskById(taskId: number) {
     const prisma = this.prisma as any;
 

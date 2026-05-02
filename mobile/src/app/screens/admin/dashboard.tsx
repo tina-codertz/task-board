@@ -76,7 +76,7 @@ export default function AdminDashboardScreen() {
     { id: "overview", label: "Overview", icon: "home" },
     { id: "users", label: "Users", icon: "account-multiple" },
     { id: "tasks", label: "Tasks", icon: "checkbox-multiple-marked" },
-    { id: "teams", label: "Teams", icon: "people" },
+    { id: "teams", label: "Teams", icon: "account-multiple" },
   ];
 
   const fetchData = async () => {
@@ -276,6 +276,28 @@ export default function AdminDashboardScreen() {
                       {team.description}
                     </Text>
                   )}
+                  <View style={styles.teamStats}>
+                    <View style={styles.statItem}>
+                      <MaterialCommunityIcons 
+                        name="account-multiple" 
+                        size={14} 
+                        color="#666" 
+                      />
+                      <Text style={styles.statText}>
+                        {team.members?.length || 0} Members
+                      </Text>
+                    </View>
+                    <View style={styles.statItem}>
+                      <MaterialCommunityIcons 
+                        name="checkbox-multiple-marked" 
+                        size={14} 
+                        color="#666" 
+                      />
+                      <Text style={styles.statText}>
+                        {team.tasks?.length || 0} Tasks
+                      </Text>
+                    </View>
+                  </View>
                 </View>
               ))
             ) : (
@@ -375,5 +397,19 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#999",
     marginTop: 4,
+  },
+  teamStats: {
+    flexDirection: "row",
+    gap: 12,
+    marginTop: 8,
+  },
+  statItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  statText: {
+    fontSize: 12,
+    color: "#666",
   },
 });

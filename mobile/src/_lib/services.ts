@@ -68,6 +68,10 @@ export const taskAPI = {
     return authenticatedFetch("/tasks");
   },
 
+  async getCreatedTasks() {
+    return authenticatedFetch("/tasks/created");
+  },
+
   async getAssignedTasks() {
     return authenticatedFetch("/tasks/assigned");
   },
@@ -94,8 +98,40 @@ export const taskAPI = {
     });
   },
 
+  async updateTaskStatus(id: number, status: string) {
+    return authenticatedFetch(`/tasks/${id}/status`, {
+      method: "PATCH",
+      body: JSON.stringify({ status }),
+    });
+  },
+
   async deleteTask(id: number) {
     return authenticatedFetch(`/tasks/${id}`, {
+      method: "DELETE",
+    });
+  },
+
+  // Comment methods
+  async getTaskComments(taskId: number) {
+    return authenticatedFetch(`/tasks/${taskId}/comments`);
+  },
+
+  async addComment(taskId: number, content: string) {
+    return authenticatedFetch(`/tasks/${taskId}/comments`, {
+      method: "POST",
+      body: JSON.stringify({ content }),
+    });
+  },
+
+  async updateComment(commentId: number, content: string) {
+    return authenticatedFetch(`/comments/${commentId}`, {
+      method: "PATCH",
+      body: JSON.stringify({ content }),
+    });
+  },
+
+  async deleteComment(commentId: number) {
+    return authenticatedFetch(`/comments/${commentId}`, {
       method: "DELETE",
     });
   },

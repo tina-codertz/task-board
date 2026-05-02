@@ -12,7 +12,7 @@ import { useAuth } from "../../../_context/AuthContext";
 import { taskAPI, teamAPI } from "../../../_lib/services";
 import StatCard from "../../../components/StatCard";
 import BottomTabBar from "../../../components/BottomTabBar";
-import TaskListItem from "../../../components/TaskListItem";
+import TaskListItemWithStatus from "../../../components/TaskListItemWithStatus";
 import Loading from "../../../components/Loading";
 import Error from "../../../components/Error";
 import EmptyState from "../../../components/EmptyState";
@@ -24,6 +24,7 @@ interface Stats {
   completedTasks: number;
   inProgressTasks: number;
   teamMembers: number;
+  myTeams: number;
 }
 
 interface Task {
@@ -31,7 +32,17 @@ interface Task {
   title: string;
   description: string;
   status: string;
-  priority: string;
+  priority?: string;
+  assignedTo?: any;
+  team?: any;
+}
+
+interface Team {
+  id: number;
+  name: string;
+  description?: string;
+  members?: any[];
+  tasks?: any[];
 }
 
 export default function ManagerDashboardScreen() {
@@ -47,14 +58,16 @@ export default function ManagerDashboardScreen() {
     completedTasks: 0,
     inProgressTasks: 0,
     teamMembers: 0,
+    myTeams: 0,
   });
 
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [teams, setTeams] = useState<Team[]>([]);
 
   const tabs = [
     { id: "overview", label: "Overview", icon: "home" },
     { id: "tasks", label: "My Tasks", icon: "checkbox-multiple-marked" },
-    { id: "team", label: "My Team", icon: "people" },
+    { id: "team", label: "My Team", icon: "account-multiple" },
   ];
 
   const fetchData = async () => {
@@ -62,19 +75,34 @@ export default function ManagerDashboardScreen() {
       setError(null);
       setLoading(true);
 
-      // Fetch manager's tasks
-      const tasksData = await taskAPI.getAssignedTasks();
+      // Fetch manager's created tasks and teams in parallel
+      const [tasksData, teamsData] = await Promise.all([
+        taskAPI.getCreatedTasks(),
+        teamAPI.getMyTeams(),
+      ]);
+      
       const tasksList = tasksData.tasks || [];
+      const teamsList = Array.isArray(teamsData) ? teamsData : (teamsData.teams || []);
 
       // Calculate stats
+      const completedCount = tasksList.filter((t: Task) => t.status === "DONE").length;
+      const inProgressCount = tasksList.filter((t: Task) => t.status === "IN_PROGRESS").length;
+      
+      // Count total team members across all teams
+      const totalMembers = teamsList.reduce((sum: number, team: Team) => {
+        return sum + (team.members?.length || 0);
+      }, 0);
+
       setStats({
         myTasks: tasksList.length,
-        completedTasks: tasksList.filter((t: Task) => t.status === "COMPLETED").length,
-        inProgressTasks: tasksList.filter((t: Task) => t.status === "IN_PROGRESS").length,
-        teamMembers: 0, // Will be populated from team endpoint
+        completedTasks: completedCount,
+        inProgressTasks: inProgressCount,
+        teamMembers: totalMembers,
+        myTeams: teamsList.length,
       });
 
       setTasks(tasksList);
+      setTeams(teamsList);
     } catch (err: any) {
       setError(err?.message || "Failed to fetch data");
     } finally {
@@ -175,20 +203,109 @@ export default function ManagerDashboardScreen() {
             <Text style={styles.sectionTitle}>My Tasks</Text>
             {tasks.length > 0 ? (
               tasks.map((task) => (
-                <TaskListItem
+                <TouchableOpacity
                   key={task.id}
-                  id={task.id}
-                  title={task.title}
-                  description={task.description}
-                  status={task.status}
-                  priority={task.priority}
-                />
+                  onPress={() =>
+                    router.push({
+                      pathname: "/screens/manager/task-detail",
+                      params: { taskId: task.id.toString() },
+                    })
+                  }
+                  activeOpacity={0.7}
+                >
+                  <TaskListItemWithStatus
+                    id={task.id}
+                    title={task.title}
+                    description={task.description}
+                    status={task.status}
+                    priority={task.priority || "MEDIUM"}
+                    assignedTo={task.assignedTo}
+                    team={task.team}
+                    onStatusChange={() => {
+                      // Refresh the task list after status change
+                      fetchData();
+                    }}
+                  />
+                </TouchableOpacity>
               ))
             ) : (
               <EmptyState
                 icon="checkbox-multiple-outline"
                 title="No Tasks"
-                message="You don't have any tasks assigned"
+                message="You haven't created any tasks yet"
+              />
+            )}
+          </View>
+        )}
+
+        {/* Teams Tab */}
+        {activeTab === "team" && (
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>My Teams</Text>
+              <TouchableOpacity
+                style={styles.createButton}
+                onPress={() => router.push("/screens/manager/create-team")}
+              >
+                <MaterialCommunityIcons name="plus" size={20} color="#fff" />
+                <Text style={styles.createButtonText}>Create</Text>
+              </TouchableOpacity>
+            </View>
+            {teams.length > 0 ? (
+              teams.map((team) => (
+                <TouchableOpacity
+                  key={team.id}
+                  style={styles.teamCard}
+                  onPress={() =>
+                    router.push({
+                      pathname: "/screens/manager/team-detail",
+                      params: {
+                        teamId: team.id.toString(),
+                        teamName: team.name,
+                      },
+                    })
+                  }
+                >
+                  <View style={styles.teamCardHeader}>
+                    <View style={styles.teamCardInfo}>
+                      <Text style={styles.teamName}>{team.name}</Text>
+                      {team.description && (
+                        <Text style={styles.teamDescription} numberOfLines={1}>
+                          {team.description}
+                        </Text>
+                      )}
+                    </View>
+                    <MaterialCommunityIcons name="chevron-right" size={24} color="#FF9800" />
+                  </View>
+                  <View style={styles.teamStats}>
+                    <View style={styles.statItem}>
+                      <MaterialCommunityIcons 
+                        name="account-multiple" 
+                        size={16} 
+                        color="#666" 
+                      />
+                      <Text style={styles.statText}>
+                        {team.members?.length || 0} Members
+                      </Text>
+                    </View>
+                    <View style={styles.statItem}>
+                      <MaterialCommunityIcons 
+                        name="checkbox-multiple-marked" 
+                        size={16} 
+                        color="#666" 
+                      />
+                      <Text style={styles.statText}>
+                        {team.tasks?.length || 0} Tasks
+                      </Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              ))
+            ) : (
+              <EmptyState
+                icon="account-multiple"
+                title="No Teams"
+                message="You haven't created any teams yet"
               />
             )}
           </View>
@@ -258,10 +375,75 @@ const styles = StyleSheet.create({
   section: {
     padding: 16,
   },
+  sectionHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+  },
   sectionTitle: {
     fontSize: 18,
     fontWeight: "bold",
     color: "#000",
-    marginBottom: 16,
+  },
+  createButton: {
+    flexDirection: "row",
+    backgroundColor: "#FF9800",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 6,
+    alignItems: "center",
+    gap: 4,
+  },
+  createButtonText: {
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  teamCard: {
+    backgroundColor: "#fff",
+    borderRadius: 8,
+    padding: 16,
+    marginBottom: 12,
+    borderLeftWidth: 4,
+    borderLeftColor: "#FF9800",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  teamCardHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginBottom: 12,
+  },
+  teamCardInfo: {
+    flex: 1,
+  },
+  teamName: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#000",
+    marginBottom: 4,
+  },
+  teamDescription: {
+    fontSize: 13,
+    color: "#666",
+    marginBottom: 0,
+  },
+  teamStats: {
+    flexDirection: "row",
+    gap: 16,
+  },
+  statItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  statText: {
+    fontSize: 12,
+    color: "#666",
   },
 });

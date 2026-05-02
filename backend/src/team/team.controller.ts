@@ -46,7 +46,7 @@ export class TeamController {
   @UseGuards(JwtAuthGuard)
   @Post(':id/members')
   async addMember(@Param('id') id: string, @Request() req: any, @Body() body: any) {
-    return await this.teamService.addMemberToTeam(parseInt(id), req.user.userId, body.userId);
+    return await this.teamService.addMemberToTeam(parseInt(id), req.user.userId, body.memberId);
   }
 
 

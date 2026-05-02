@@ -19,6 +19,16 @@ export default function DashboardHeader({
   const router = useRouter();
   const [loggingOut, setLoggingOut] = useState(false);
 
+  const handleProfilePress = () => {
+    if (role === "MANAGER") {
+      router.push("/screens/manager/profile");
+    } else if (role === "ADMIN") {
+      router.push("/screens/admin/profile");
+    } else {
+      router.push("/screens/member/profile");
+    }
+  };
+
   const handleLogout = async () => {
     Alert.alert("Logout", "Are you sure you want to logout?", [
       {
@@ -49,14 +59,22 @@ export default function DashboardHeader({
         <Text style={styles.greeting}>Welcome, {user?.name}</Text>
         <Text style={styles.role}>{title}</Text>
       </View>
-      <TouchableOpacity
-        style={styles.logoutButton}
-        onPress={handleLogout}
-        disabled={loggingOut}
-      >
-        <MaterialCommunityIcons name="logout" size={20} color="#fff" />
-        <Text style={styles.logoutText}>Logout</Text>
-      </TouchableOpacity>
+      <View style={styles.buttonGroup}>
+        <TouchableOpacity
+          style={styles.profileButton}
+          onPress={handleProfilePress}
+          disabled={loggingOut}
+        >
+          <MaterialCommunityIcons name="account" size={20} color="#fff" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.logoutButton}
+          onPress={handleLogout}
+          disabled={loggingOut}
+        >
+          <MaterialCommunityIcons name="logout" size={20} color="#fff" />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -83,12 +101,18 @@ const styles = StyleSheet.create({
     color: "rgba(255, 255, 255, 0.8)",
     marginTop: 4,
   },
-  logoutButton: {
+  buttonGroup: {
     flexDirection: "row",
+    gap: 8,
     alignItems: "center",
-    gap: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+  },
+  profileButton: {
+    padding: 8,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    borderRadius: 6,
+  },
+  logoutButton: {
+    padding: 8,
     backgroundColor: "rgba(255, 255, 255, 0.2)",
     borderRadius: 6,
   },

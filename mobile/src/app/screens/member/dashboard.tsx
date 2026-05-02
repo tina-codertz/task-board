@@ -5,9 +5,11 @@ import {
   StyleSheet,
   ScrollView,
   RefreshControl,
+  TouchableOpacity,
 } from "react-native";
+import { useRouter } from "expo-router";
 import { useAuth } from "../../../_context/AuthContext";
-import { taskAPI } from "../../../_lib/services";
+import { taskAPI, teamAPI } from "../../../_lib/services";
 import StatCard from "../../../components/StatCard";
 import BottomTabBar from "../../../components/BottomTabBar";
 import TaskListItem from "../../../components/TaskListItem";
@@ -15,12 +17,14 @@ import Loading from "../../../components/Loading";
 import Error from "../../../components/Error";
 import EmptyState from "../../../components/EmptyState";
 import DashboardHeader from "../../../components/DashboardHeader";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 interface Stats {
   myTasks: number;
   completedTasks: number;
   inProgressTasks: number;
   todoTasks: number;
+  myTeams: number;
 }
 
 interface Task {
@@ -28,12 +32,21 @@ interface Task {
   title: string;
   description: string;
   status: string;
-  priority: string;
+  priority?: string;
   dueDate?: string;
+}
+
+interface Team {
+  id: number;
+  name: string;
+  description?: string;
+  members?: any[];
+  tasks?: any[];
 }
 
 export default function MemberDashboardScreen() {
   const { user } = useAuth();
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState("overview");
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -44,13 +57,16 @@ export default function MemberDashboardScreen() {
     completedTasks: 0,
     inProgressTasks: 0,
     todoTasks: 0,
+    myTeams: 0,
   });
 
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [teams, setTeams] = useState<Team[]>([]);
 
   const tabs = [
     { id: "overview", label: "Overview", icon: "home" },
     { id: "tasks", label: "My Tasks", icon: "checkbox-multiple-marked" },
+    { id: "teams", label: "My Teams", icon: "account-multiple" },
   ];
 
   const fetchData = async () => {
@@ -58,19 +74,26 @@ export default function MemberDashboardScreen() {
       setError(null);
       setLoading(true);
 
-      // Fetch member's assigned tasks
-      const tasksData = await taskAPI.getAssignedTasks();
+      // Fetch member's assigned tasks and teams in parallel
+      const [tasksData, teamsData] = await Promise.all([
+        taskAPI.getAssignedTasks(),
+        teamAPI.getMyTeams(),
+      ]);
+      
       const tasksList = tasksData.tasks || [];
+      const teamsList = Array.isArray(teamsData) ? teamsData : (teamsData.teams || []);
 
       // Calculate stats
       setStats({
         myTasks: tasksList.length,
-        completedTasks: tasksList.filter((t: Task) => t.status === "COMPLETED").length,
+        completedTasks: tasksList.filter((t: Task) => t.status === "DONE").length,
         inProgressTasks: tasksList.filter((t: Task) => t.status === "IN_PROGRESS").length,
         todoTasks: tasksList.filter((t: Task) => t.status === "TODO").length,
+        myTeams: teamsList.length,
       });
 
       setTasks(tasksList);
+      setTeams(teamsList);
     } catch (err: any) {
       setError(err?.message || "Failed to fetch data");
     } finally {
@@ -144,6 +167,13 @@ export default function MemberDashboardScreen() {
               icon="clipboard-list-outline"
               color="#9C27B0"
             />
+            <Text style={[styles.sectionTitle, { marginTop: 16 }]}>Your Teams</Text>
+            <StatCard
+              title="Total Teams"
+              value={stats.myTeams}
+              icon="account-multiple"
+              color="#00BCD4"
+            />
           </View>
         )}
 
@@ -159,8 +189,14 @@ export default function MemberDashboardScreen() {
                   title={task.title}
                   description={task.description}
                   status={task.status}
-                  priority={task.priority}
+                  priority={task.priority || "MEDIUM"}
                   dueDate={task.dueDate}
+                  onPress={() =>
+                    router.push({
+                      pathname: "/screens/member/task-detail",
+                      params: { taskId: task.id.toString() },
+                    })
+                  }
                 />
               ))
             ) : (
@@ -168,6 +204,74 @@ export default function MemberDashboardScreen() {
                 icon="checkbox-multiple-outline"
                 title="No Tasks"
                 message="You don't have any tasks assigned yet"
+              />
+            )}
+          </View>
+        )}
+
+        {/* Teams Tab */}
+        {activeTab === "teams" && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>My Teams</Text>
+            {teams.length > 0 ? (
+              teams.map((team) => (
+                <TouchableOpacity
+                  key={team.id}
+                  onPress={() =>
+                    router.push({
+                      pathname: "/screens/member/team-detail",
+                      params: {
+                        teamId: team.id.toString(),
+                        teamName: team.name,
+                      },
+                    })
+                  }
+                  style={styles.teamCardTouchable}
+                >
+                  <View style={styles.teamCard}>
+                    <View style={styles.teamCardContent}>
+                      <Text style={styles.teamName}>{team.name}</Text>
+                      {team.description && (
+                        <Text style={styles.teamDescription} numberOfLines={1}>
+                          {team.description}
+                        </Text>
+                      )}
+                      <View style={styles.teamStats}>
+                        <View style={styles.statItem}>
+                          <MaterialCommunityIcons 
+                            name="account-multiple" 
+                            size={16} 
+                            color="#666" 
+                          />
+                          <Text style={styles.statText}>
+                            {team.members?.length || 0} Members
+                          </Text>
+                        </View>
+                        <View style={styles.statItem}>
+                          <MaterialCommunityIcons 
+                            name="checkbox-multiple-marked" 
+                            size={16} 
+                            color="#666" 
+                          />
+                          <Text style={styles.statText}>
+                            {team.tasks?.length || 0} Tasks
+                          </Text>
+                        </View>
+                      </View>
+                    </View>
+                    <MaterialCommunityIcons 
+                      name="chevron-right" 
+                      size={24} 
+                      color="#4CAF50" 
+                    />
+                  </View>
+                </TouchableOpacity>
+              ))
+            ) : (
+              <EmptyState
+                icon="account-multiple"
+                title="No Teams"
+                message="You are not part of any teams yet"
               />
             )}
           </View>
@@ -217,5 +321,50 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#000",
     marginBottom: 16,
+  },
+  teamCardTouchable: {
+    marginBottom: 12,
+  },
+  teamCard: {
+    backgroundColor: "#fff",
+    borderRadius: 8,
+    padding: 16,
+    borderLeftWidth: 4,
+    borderLeftColor: "#4CAF50",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+  },
+  teamCardContent: {
+    flex: 1,
+  },
+  teamName: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#000",
+    marginBottom: 4,
+  },
+  teamDescription: {
+    fontSize: 13,
+    color: "#666",
+    marginBottom: 12,
+  },
+  teamStats: {
+    flexDirection: "row",
+    gap: 16,
+  },
+  statItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  statText: {
+    fontSize: 12,
+    color: "#666",
   },
 });

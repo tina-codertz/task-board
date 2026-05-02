@@ -30,24 +30,24 @@ export default function CreateTeamScreen() {
       setError(null);
       setLoading(true);
 
-      await teamAPI.createTeam({
+      const result = await teamAPI.createTeam({
         name: name.trim(),
         description: description.trim(),
       });
 
-      Alert.alert("Success", "Team created successfully", [
-        {
-          text: "OK",
-          onPress: () => {
-            setName("");
-            setDescription("");
-            router.back();
-          },
+      // Get team ID from result
+      const teamId = result.id;
+
+      // Navigate to add members screen
+      router.push({
+        pathname: "/screens/manager/add-members-to-team",
+        params: {
+          teamId: teamId.toString(),
+          teamName: name.trim(),
         },
-      ]);
+      });
     } catch (err: any) {
       setError(err?.message || "Failed to create team");
-    } finally {
       setLoading(false);
     }
   };

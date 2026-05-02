@@ -17,15 +17,21 @@ export class TaskController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get()
-  async getAllTasks(@Request() req: any) {
-    return { tasks: await this.taskService.getAllTasks(req.user.userId) };
+  @Get('created')
+  async getCreatedTasks(@Request() req: any) {
+    return { tasks: await this.taskService.getTasksCreatedByMe(req.user.userId) };
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('assigned')
   async getAssignedTasks(@Request() req: any) {
     return { tasks: await this.taskService.getTasksAssignedToMe(req.user.userId) };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get()
+  async getAllTasks(@Request() req: any) {
+    return { tasks: await this.taskService.getAllTasks(req.user.userId) };
   }
 
   @UseGuards(JwtAuthGuard)
