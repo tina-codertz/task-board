@@ -17,6 +17,7 @@ import Loading from "../../../components/Loading";
 import Error from "../../../components/Error";
 import EmptyState from "../../../components/EmptyState";
 import DashboardHeader from "../../../components/DashboardHeader";
+import FadeInView from "../../../components/FadeInView";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 interface Stats {
@@ -128,7 +129,7 @@ export default function MemberDashboardScreen() {
       {/* Header with Logout */}
       <DashboardHeader
         title="Member"
-        backgroundColor="#4CAF50"
+        backgroundColor="#0A2540"
         role="USER"
       />
 
@@ -142,62 +143,79 @@ export default function MemberDashboardScreen() {
         {/* Overview Tab */}
         {activeTab === "overview" && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Your Tasks</Text>
-            <StatCard
-              title="Total Tasks"
-              value={stats.myTasks}
-              icon="checkbox-multiple-outline"
-              color="#007AFF"
-            />
-            <StatCard
-              title="Completed"
-              value={stats.completedTasks}
-              icon="checkbox-marked-circle"
-              color="#4CAF50"
-            />
-            <StatCard
-              title="In Progress"
-              value={stats.inProgressTasks}
-              icon="progress-clock"
-              color="#FF9800"
-            />
-            <StatCard
-              title="To Do"
-              value={stats.todoTasks}
-              icon="clipboard-list-outline"
-              color="#9C27B0"
-            />
-            <Text style={[styles.sectionTitle, { marginTop: 16 }]}>Your Teams</Text>
-            <StatCard
-              title="Total Teams"
-              value={stats.myTeams}
-              icon="account-multiple"
-              color="#00BCD4"
-            />
+            <FadeInView delay={100}>
+              <Text style={styles.sectionTitle}>Your Tasks</Text>
+            </FadeInView>
+            <FadeInView delay={200}>
+              <StatCard
+                title="Total Tasks"
+                value={stats.myTasks}
+                icon="checkbox-multiple-outline"
+                color="#0A2540"
+              />
+            </FadeInView>
+            <FadeInView delay={300}>
+              <StatCard
+                title="Completed"
+                value={stats.completedTasks}
+                icon="checkbox-marked-circle"
+                color="#007AFF"
+              />
+            </FadeInView>
+            <FadeInView delay={400}>
+              <StatCard
+                title="In Progress"
+                value={stats.inProgressTasks}
+                icon="progress-clock"
+                color="#0A2540"
+              />
+            </FadeInView>
+            <FadeInView delay={500}>
+              <StatCard
+                title="To Do"
+                value={stats.todoTasks}
+                icon="clipboard-list-outline"
+                color="#007AFF"
+              />
+            </FadeInView>
+            <FadeInView delay={600}>
+              <Text style={[styles.sectionTitle, { marginTop: 16 }]}>Your Teams</Text>
+            </FadeInView>
+            <FadeInView delay={700}>
+              <StatCard
+                title="Total Teams"
+                value={stats.myTeams}
+                icon="account-multiple"
+                color="#0A2540"
+              />
+            </FadeInView>
           </View>
         )}
 
         {/* Tasks Tab */}
         {activeTab === "tasks" && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>My Tasks</Text>
+            <FadeInView delay={100}>
+              <Text style={styles.sectionTitle}>My Tasks</Text>
+            </FadeInView>
             {tasks.length > 0 ? (
-              tasks.map((task) => (
-                <TaskListItem
-                  key={task.id}
-                  id={task.id}
-                  title={task.title}
-                  description={task.description}
-                  status={task.status}
-                  priority={task.priority || "MEDIUM"}
-                  dueDate={task.dueDate}
-                  onPress={() =>
-                    router.push({
-                      pathname: "/screens/member/task-detail",
-                      params: { taskId: task.id.toString() },
-                    })
-                  }
-                />
+              tasks.map((task, index) => (
+                <FadeInView key={task.id} delay={150 + index * 50}>
+                  <TaskListItem
+                    id={task.id}
+                    title={task.title}
+                    description={task.description}
+                    status={task.status}
+                    priority={task.priority || "MEDIUM"}
+                    dueDate={task.dueDate}
+                    onPress={() =>
+                      router.push({
+                        pathname: "/screens/member/task-detail",
+                        params: { taskId: task.id.toString() },
+                      })
+                    }
+                  />
+                </FadeInView>
               ))
             ) : (
               <EmptyState
@@ -212,60 +230,63 @@ export default function MemberDashboardScreen() {
         {/* Teams Tab */}
         {activeTab === "teams" && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>My Teams</Text>
+            <FadeInView delay={100}>
+              <Text style={styles.sectionTitle}>My Teams</Text>
+            </FadeInView>
             {teams.length > 0 ? (
-              teams.map((team) => (
-                <TouchableOpacity
-                  key={team.id}
-                  onPress={() =>
-                    router.push({
-                      pathname: "/screens/member/team-detail",
-                      params: {
-                        teamId: team.id.toString(),
-                        teamName: team.name,
-                      },
-                    })
-                  }
-                  style={styles.teamCardTouchable}
-                >
-                  <View style={styles.teamCard}>
-                    <View style={styles.teamCardContent}>
-                      <Text style={styles.teamName}>{team.name}</Text>
-                      {team.description && (
-                        <Text style={styles.teamDescription} numberOfLines={1}>
-                          {team.description}
-                        </Text>
-                      )}
-                      <View style={styles.teamStats}>
-                        <View style={styles.statItem}>
-                          <MaterialCommunityIcons 
-                            name="account-multiple" 
-                            size={16} 
-                            color="#666" 
-                          />
-                          <Text style={styles.statText}>
-                            {team.members?.length || 0} Members
+              teams.map((team, index) => (
+                <FadeInView key={team.id} delay={150 + index * 50}>
+                  <TouchableOpacity
+                    onPress={() =>
+                      router.push({
+                        pathname: "/screens/member/team-detail",
+                        params: {
+                          teamId: team.id.toString(),
+                          teamName: team.name,
+                        },
+                      })
+                    }
+                    style={styles.teamCardTouchable}
+                  >
+                    <View style={styles.teamCard}>
+                      <View style={styles.teamCardContent}>
+                        <Text style={styles.teamName}>{team.name}</Text>
+                        {team.description && (
+                          <Text style={styles.teamDescription} numberOfLines={1}>
+                            {team.description}
                           </Text>
-                        </View>
-                        <View style={styles.statItem}>
-                          <MaterialCommunityIcons 
-                            name="checkbox-multiple-marked" 
-                            size={16} 
-                            color="#666" 
-                          />
-                          <Text style={styles.statText}>
-                            {team.tasks?.length || 0} Tasks
-                          </Text>
+                        )}
+                        <View style={styles.teamStats}>
+                          <View style={styles.statItem}>
+                            <MaterialCommunityIcons 
+                              name="account-multiple" 
+                              size={16} 
+                              color="#666" 
+                            />
+                            <Text style={styles.statText}>
+                              {team.members?.length || 0} Members
+                            </Text>
+                          </View>
+                          <View style={styles.statItem}>
+                            <MaterialCommunityIcons 
+                              name="checkbox-multiple-marked" 
+                              size={16} 
+                              color="#666" 
+                            />
+                            <Text style={styles.statText}>
+                              {team.tasks?.length || 0} Tasks
+                            </Text>
+                          </View>
                         </View>
                       </View>
+                      <MaterialCommunityIcons 
+                        name="chevron-right" 
+                        size={24} 
+                        color="#007AFF" 
+                      />
                     </View>
-                    <MaterialCommunityIcons 
-                      name="chevron-right" 
-                      size={24} 
-                      color="#4CAF50" 
-                    />
-                  </View>
-                </TouchableOpacity>
+                  </TouchableOpacity>
+                </FadeInView>
               ))
             ) : (
               <EmptyState
@@ -283,7 +304,7 @@ export default function MemberDashboardScreen() {
         tabs={tabs}
         activeTab={activeTab}
         onTabChange={setActiveTab}
-        color="#4CAF50"
+        color="#007AFF"
       />
     </View>
   );
@@ -295,7 +316,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#f5f5f5",
   },
   header: {
-    backgroundColor: "#4CAF50",
+    backgroundColor: "#0A2540",
     paddingHorizontal: 20,
     paddingVertical: 16,
     paddingTop: 20,
@@ -330,7 +351,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 16,
     borderLeftWidth: 4,
-    borderLeftColor: "#4CAF50",
+    borderLeftColor: "#0A2540",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,

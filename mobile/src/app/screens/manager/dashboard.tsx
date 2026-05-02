@@ -18,6 +18,7 @@ import Loading from "../../../components/Loading";
 import Error from "../../../components/Error";
 import EmptyState from "../../../components/EmptyState";
 import DashboardHeader from "../../../components/DashboardHeader";
+import FadeInView from "../../../components/FadeInView";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 interface Stats {
@@ -81,14 +82,14 @@ export default function ManagerDashboardScreen() {
         taskAPI.getCreatedTasks(),
         teamAPI.getMyTeams(),
       ]);
-      
+
       const tasksList = tasksData.tasks || [];
       const teamsList = Array.isArray(teamsData) ? teamsData : (teamsData.teams || []);
 
       // Calculate stats
       const completedCount = tasksList.filter((t: Task) => t.status === "DONE").length;
       const inProgressCount = tasksList.filter((t: Task) => t.status === "IN_PROGRESS").length;
-      
+
       // Count total team members across all teams
       const totalMembers = teamsList.reduce((sum: number, team: Team) => {
         return sum + (team.members?.length || 0);
@@ -174,7 +175,7 @@ export default function ManagerDashboardScreen() {
       {/* Header with Logout */}
       <DashboardHeader
         title="Manager"
-        backgroundColor="#FF9800"
+        backgroundColor="#0A2540"
         role="MANAGER"
       />
 
@@ -188,11 +189,11 @@ export default function ManagerDashboardScreen() {
           <Text style={styles.actionButtonText}>Create Task</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={styles.actionButton}
+          style={[styles.actionButton, styles.actionButtonSecondary]}
           onPress={() => router.push("/screens/manager/create-team")}
         >
-          <MaterialCommunityIcons name="account-multiple-plus" size={18} color="#fff" />
-          <Text style={styles.actionButtonText}>Create Team</Text>
+          <MaterialCommunityIcons name="account-multiple-plus" size={18} color="#007AFF" />
+          <Text style={styles.actionButtonTextSecondary}>Create Team</Text>
         </TouchableOpacity>
       </View>
 
@@ -206,65 +207,78 @@ export default function ManagerDashboardScreen() {
         {/* Overview Tab */}
         {activeTab === "overview" && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Task Overview</Text>
-            <StatCard
-              title="My Tasks"
-              value={stats.myTasks}
-              icon="checkbox-multiple-outline"
-              color="#007AFF"
-            />
-            <StatCard
-              title="Completed"
-              value={stats.completedTasks}
-              icon="checkbox-marked-circle"
-              color="#4CAF50"
-            />
-            <StatCard
-              title="In Progress"
-              value={stats.inProgressTasks}
-              icon="progress-clock"
-              color="#FF9800"
-            />
-            <StatCard
-              title="Team Members"
-              value={stats.teamMembers}
-              icon="account-multiple"
-              color="#9C27B0"
-            />
+            <FadeInView delay={100}>
+              <Text style={styles.sectionTitle}>Task Overview</Text>
+            </FadeInView>
+            <FadeInView delay={200}>
+              <StatCard
+                title="My Tasks"
+                value={stats.myTasks}
+                icon="checkbox-multiple-outline"
+                color="#007AFF"
+              />
+            </FadeInView>
+            <FadeInView delay={300}>
+              <StatCard
+                title="Completed"
+                value={stats.completedTasks}
+                icon="checkbox-marked-circle"
+                color="#4CAF50"
+              />
+            </FadeInView>
+            <FadeInView delay={400}>
+              <StatCard
+                title="In Progress"
+                value={stats.inProgressTasks}
+                icon="progress-clock"
+                color="#FF9800"
+              />
+            </FadeInView>
+            <FadeInView delay={500}>
+              <StatCard
+                title="Team Members"
+                value={stats.teamMembers}
+                icon="account-multiple"
+                color="#0A2540"
+              />
+            </FadeInView>
           </View>
         )}
 
         {/* Tasks Tab */}
         {activeTab === "tasks" && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>My Tasks</Text>
+            <FadeInView delay={100}>
+              <Text style={styles.sectionTitle}>My Tasks</Text>
+            </FadeInView>
             {tasks.length > 0 ? (
-              tasks.map((task) => (
-                <TouchableOpacity
-                  key={task.id}
-                  onPress={() =>
-                    router.push({
-                      pathname: "/screens/manager/task-detail",
-                      params: { taskId: task.id.toString() },
-                    })
-                  }
-                  activeOpacity={0.7}
-                >
-                  <TaskListItemWithStatus
-                    id={task.id}
-                    title={task.title}
-                    description={task.description}
-                    status={task.status}
-                    priority={task.priority || "MEDIUM"}
-                    assignedTo={task.assignedTo}
-                    team={task.team}
-                    onStatusChange={() => {
-                      // Refresh the task list after status change
-                      fetchData();
-                    }}
-                    onDelete={() => handleDeleteTask(task.id, task.title)}
-                  />
-                </TouchableOpacity>
+              tasks.map((task, index) => (
+                <FadeInView key={task.id} delay={150 + index * 50}>
+                  <TouchableOpacity
+                    onPress={() =>
+                      router.push({
+                        pathname: "/screens/manager/task-detail",
+                        params: { taskId: task.id.toString() },
+                      })
+                    }
+                    activeOpacity={0.7}
+                  >
+                    <TaskListItemWithStatus
+                      id={task.id}
+                      title={task.title}
+                      description={task.description}
+                      status={task.status}
+                      priority={task.priority || "MEDIUM"}
+                      assignedTo={task.assignedTo}
+                      team={task.team}
+                      onStatusChange={() => {
+                        // Refresh the task list after status change
+                        fetchData();
+                      }}
+                      onDelete={() => handleDeleteTask(task.id, task.title)}
+                    />
+                  </TouchableOpacity>
+                </FadeInView>
               ))
             ) : (
               <EmptyState
@@ -279,76 +293,79 @@ export default function ManagerDashboardScreen() {
         {/* Teams Tab */}
         {activeTab === "team" && (
           <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>My Teams</Text>
-              <TouchableOpacity
-                style={styles.createButton}
-                onPress={() => router.push("/screens/manager/create-team")}
-              >
-                <MaterialCommunityIcons name="plus" size={20} color="#fff" />
-                <Text style={styles.createButtonText}>Create</Text>
-              </TouchableOpacity>
-            </View>
-            {teams.length > 0 ? (
-              teams.map((team) => (
+            <FadeInView delay={100}>
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionTitle}>My Teams</Text>
                 <TouchableOpacity
-                  key={team.id}
-                  style={styles.teamCard}
-                  onPress={() =>
-                    router.push({
-                      pathname: "/screens/manager/team-detail",
-                      params: {
-                        teamId: team.id.toString(),
-                        teamName: team.name,
-                      },
-                    })
-                  }
+                  style={styles.createButton}
+                  onPress={() => router.push("/screens/manager/create-team")}
                 >
-                  <View style={styles.teamCardHeader}>
-                    <View style={styles.teamCardInfo}>
-                      <Text style={styles.teamName}>{team.name}</Text>
-                      {team.description && (
-                        <Text style={styles.teamDescription} numberOfLines={1}>
-                          {team.description}
-                        </Text>
-                      )}
-                    </View>
-                    <MaterialCommunityIcons name="chevron-right" size={24} color="#FF9800" />
-                  </View>
-                  <View style={styles.teamStatsContainer}>
-                    <View style={styles.teamStats}>
-                      <View style={styles.statItem}>
-                        <MaterialCommunityIcons 
-                          name="account-multiple" 
-                          size={16} 
-                          color="#666" 
-                        />
-                        <Text style={styles.statText}>
-                          {team.members?.length || 0} Members
-                        </Text>
-                      </View>
-                      <View style={styles.statItem}>
-                        <MaterialCommunityIcons 
-                          name="checkbox-multiple-marked" 
-                          size={16} 
-                          color="#666" 
-                        />
-                        <Text style={styles.statText}>
-                          {team.tasks?.length || 0} Tasks
-                        </Text>
-                      </View>
-                    </View>
-                    <TouchableOpacity
-                      style={styles.deleteButton}
-                      onPress={(e) => {
-                        e.stopPropagation();
-                        handleDeleteTeam(team.id, team.name);
-                      }}
-                    >
-                      <MaterialCommunityIcons name="delete" size={24} color="#f44" />
-                    </TouchableOpacity>
-                  </View>
+                  <MaterialCommunityIcons name="plus" size={20} color="#fff" />
+                  <Text style={styles.createButtonText}>Create</Text>
                 </TouchableOpacity>
+              </View>
+            </FadeInView>
+            {teams.length > 0 ? (
+              teams.map((team, index) => (
+                <FadeInView key={team.id} delay={150 + index * 50}>
+                  <TouchableOpacity
+                    style={styles.teamCard}
+                    onPress={() =>
+                      router.push({
+                        pathname: "/screens/manager/team-detail",
+                        params: {
+                          teamId: team.id.toString(),
+                          teamName: team.name,
+                        },
+                      })
+                    }
+                  >
+                    <View style={styles.teamCardHeader}>
+                      <View style={styles.teamCardInfo}>
+                        <Text style={styles.teamName}>{team.name}</Text>
+                        {team.description && (
+                          <Text style={styles.teamDescription} numberOfLines={1}>
+                            {team.description}
+                          </Text>
+                        )}
+                      </View>
+                      <MaterialCommunityIcons name="chevron-right" size={24} color="#007AFF" />
+                    </View>
+                    <View style={styles.teamStatsContainer}>
+                      <View style={styles.teamStats}>
+                        <View style={styles.statItem}>
+                          <MaterialCommunityIcons
+                            name="account-multiple"
+                            size={16}
+                            color="#666"
+                          />
+                          <Text style={styles.statText}>
+                            {team.members?.length || 0} Members
+                          </Text>
+                        </View>
+                        <View style={styles.statItem}>
+                          <MaterialCommunityIcons
+                            name="checkbox-multiple-marked"
+                            size={16}
+                            color="#666"
+                          />
+                          <Text style={styles.statText}>
+                            {team.tasks?.length || 0} Tasks
+                          </Text>
+                        </View>
+                      </View>
+                      <TouchableOpacity
+                        style={styles.deleteButton}
+                        onPress={(e) => {
+                          e.stopPropagation();
+                          handleDeleteTeam(team.id, team.name);
+                        }}
+                      >
+                        <MaterialCommunityIcons name="delete" size={24} color="#E63946" />
+                      </TouchableOpacity>
+                    </View>
+                  </TouchableOpacity>
+                </FadeInView>
               ))
             ) : (
               <EmptyState
@@ -366,7 +383,7 @@ export default function ManagerDashboardScreen() {
         tabs={tabs}
         activeTab={activeTab}
         onTabChange={setActiveTab}
-        color="#FF9800"
+        color="#007AFF"
       />
     </View>
   );
@@ -405,7 +422,7 @@ const styles = StyleSheet.create({
   actionButton: {
     flex: 1,
     flexDirection: "row",
-    backgroundColor: "#FF9800",
+    backgroundColor: "#007AFF",
     paddingVertical: 10,
     paddingHorizontal: 12,
     borderRadius: 6,
@@ -413,8 +430,18 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 6,
   },
+  actionButtonSecondary: {
+    backgroundColor: "transparent",
+    borderWidth: 1,
+    borderColor: "#007AFF",
+  },
   actionButtonText: {
     color: "#fff",
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  actionButtonTextSecondary: {
+    color: "#007AFF",
     fontSize: 12,
     fontWeight: "600",
   },
@@ -437,7 +464,7 @@ const styles = StyleSheet.create({
   },
   createButton: {
     flexDirection: "row",
-    backgroundColor: "#FF9800",
+    backgroundColor: "#007AFF",
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 6,
@@ -455,7 +482,7 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 12,
     borderLeftWidth: 4,
-    borderLeftColor: "#FF9800",
+    borderLeftColor: "#0A2540",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,

@@ -15,6 +15,7 @@ import { useRouter } from "expo-router";
 import { useAuth } from "../_context/AuthContext";
 import { authAPI } from "../_lib/services";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface UserProfileData {
   id: number;
@@ -30,6 +31,7 @@ interface UserProfileProps {
 export default function UserProfile({ themeColor }: UserProfileProps) {
   const router = useRouter();
   const { user, logout } = useAuth();
+  const insets = useSafeAreaInsets();
   
   const [profile, setProfile] = useState<UserProfileData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -147,7 +149,7 @@ export default function UserProfile({ themeColor }: UserProfileProps) {
       style={styles.container}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
-      <View style={[styles.header, { backgroundColor: themeColor }]}>
+      <View style={[styles.header, { backgroundColor: themeColor, paddingTop: insets.top + 16 }]}>
         <TouchableOpacity onPress={() => router.back()}>
           <MaterialCommunityIcons name="arrow-left" size={24} color="#fff" />
         </TouchableOpacity>
@@ -365,8 +367,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 16,
-    paddingVertical: 12,
-    paddingTop: 16,
+    paddingBottom: 16,
   },
   headerTitle: {
     fontSize: 18,
@@ -530,7 +531,7 @@ const styles = StyleSheet.create({
   logoutButton: {
     backgroundColor: "#fff",
     borderWidth: 2,
-    borderColor: "#f44",
+    borderColor: "#E63946",
     borderRadius: 8,
     padding: 14,
     flexDirection: "row",
@@ -542,6 +543,6 @@ const styles = StyleSheet.create({
   logoutButtonText: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#f44",
+    color: "#E63946",
   },
 });

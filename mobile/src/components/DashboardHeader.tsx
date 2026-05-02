@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { useAuth } from "../_context/AuthContext";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 interface DashboardHeaderProps {
   title: string;
@@ -54,28 +55,30 @@ export default function DashboardHeader({
   };
 
   return (
-    <View style={[styles.header, { backgroundColor }]}>
-      <View style={styles.titleContainer}>
-        <Text style={styles.greeting}>Welcome, {user?.name}</Text>
-        <Text style={styles.role}>{title}</Text>
+    <SafeAreaView edges={["top"]} style={{ backgroundColor }}>
+      <View style={styles.header}>
+        <View style={styles.titleContainer}>
+          <Text style={styles.greeting}>Welcome, {user?.name}</Text>
+          <Text style={styles.role}>{title}</Text>
+        </View>
+        <View style={styles.buttonGroup}>
+          <TouchableOpacity
+            style={styles.profileButton}
+            onPress={handleProfilePress}
+            disabled={loggingOut}
+          >
+            <MaterialCommunityIcons name="account" size={20} color="#fff" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.logoutButton}
+            onPress={handleLogout}
+            disabled={loggingOut}
+          >
+            <MaterialCommunityIcons name="logout" size={20} color="#fff" />
+          </TouchableOpacity>
+        </View>
       </View>
-      <View style={styles.buttonGroup}>
-        <TouchableOpacity
-          style={styles.profileButton}
-          onPress={handleProfilePress}
-          disabled={loggingOut}
-        >
-          <MaterialCommunityIcons name="account" size={20} color="#fff" />
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.logoutButton}
-          onPress={handleLogout}
-          disabled={loggingOut}
-        >
-          <MaterialCommunityIcons name="logout" size={20} color="#fff" />
-        </TouchableOpacity>
-      </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -83,10 +86,11 @@ const styles = StyleSheet.create({
   header: {
     paddingHorizontal: 20,
     paddingVertical: 16,
-    paddingTop: 20,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(72, 140, 207, 0.1)",
   },
   titleContainer: {
     flex: 1,

@@ -7,6 +7,7 @@ import {
   Dimensions,
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface BottomTab {
   id: string;
@@ -27,10 +28,11 @@ export default function BottomTabBar({
   onTabChange,
   color = "#007AFF",
 }: BottomTabBarProps) {
+  const { bottom } = useSafeAreaInsets();
   const tabWidth = Dimensions.get("window").width / tabs.length;
 
   return (
-    <View style={[styles.container, { backgroundColor: color }]}>
+    <View style={[styles.container, { paddingBottom: bottom + 8 }]}>
       {tabs.map((tab) => {
         const isActive = activeTab === tab.id;
         return (
@@ -42,18 +44,17 @@ export default function BottomTabBar({
             <View
               style={[
                 styles.tabContent,
-                isActive && { backgroundColor: "rgba(255, 255, 255, 0.2)" },
               ]}
             >
               <MaterialCommunityIcons
                 name={tab.icon}
                 size={24}
-                color="#fff"
+                color={isActive ? color : "#8e8e93"}
               />
               <Text
                 style={[
                   styles.tabLabel,
-                  !isActive && styles.tabLabelInactive,
+                  { color: isActive ? color : "#8e8e93" },
                 ]}
               >
                 {tab.label}
@@ -69,10 +70,15 @@ export default function BottomTabBar({
 const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
-    paddingBottom: 8,
-    paddingTop: 8,
+    backgroundColor: "#fff",
     borderTopWidth: 1,
-    borderTopColor: "rgba(255, 255, 255, 0.2)",
+    borderTopColor: "#eee",
+    paddingTop: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 8,
   },
   tab: {
     alignItems: "center",

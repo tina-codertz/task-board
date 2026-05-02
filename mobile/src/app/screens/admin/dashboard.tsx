@@ -19,6 +19,7 @@ import Loading from "../../../components/Loading";
 import Error from "../../../components/Error";
 import EmptyState from "../../../components/EmptyState";
 import DashboardHeader from "../../../components/DashboardHeader";
+import FadeInView from "../../../components/FadeInView";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 interface Stats {
@@ -197,7 +198,7 @@ export default function AdminDashboardScreen() {
       {/* Header with Logout */}
       <DashboardHeader
         title="Administrator"
-        backgroundColor="#007AFF"
+        backgroundColor="#0A2540"
         role="ADMIN"
       />
 
@@ -211,11 +212,11 @@ export default function AdminDashboardScreen() {
           <Text style={styles.actionButtonText}>Create User</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={styles.actionButton}
+          style={[styles.actionButton, styles.actionButtonSecondary]}
           onPress={() => router.push("/screens/admin/activity-logs")}
         >
-          <MaterialCommunityIcons name="history" size={18} color="#fff" />
-          <Text style={styles.actionButtonText}>Activity Logs</Text>
+          <MaterialCommunityIcons name="history" size={18} color="#007AFF" />
+          <Text style={styles.actionButtonTextSecondary}>Activity Logs</Text>
         </TouchableOpacity>
       </View>
 
@@ -229,60 +230,77 @@ export default function AdminDashboardScreen() {
         {/* Overview Tab */}
         {activeTab === "overview" && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Dashboard Stats</Text>
-            <StatCard
-              title="Total Users"
-              value={stats.totalUsers}
-              icon="account-multiple"
-              color="#007AFF"
-            />
-            <StatCard
-              title="Administrators"
-              value={stats.admins}
-              icon="shield"
-              color="#f44"
-            />
-            <StatCard
-              title="Managers"
-              value={stats.managers}
-              icon="briefcase"
-              color="#FF9800"
-            />
-            <StatCard
-              title="Members"
-              value={stats.users}
-              icon="account-multiple-outline"
-              color="#4CAF50"
-            />
-            <StatCard
-              title="Total Tasks"
-              value={stats.totalTasks}
-              icon="checkbox-multiple-marked"
-              color="#9C27B0"
-            />
-            <StatCard
-              title="Total Teams"
-              value={stats.totalTeams}
-              icon="briefcase-multiple"
-              color="#00BCD4"
-            />
+            <FadeInView delay={100}>
+              <Text style={styles.sectionTitle}>Dashboard Stats</Text>
+            </FadeInView>
+            <FadeInView delay={200}>
+              <StatCard
+                title="Total Users"
+                value={stats.totalUsers}
+                icon="account-multiple"
+                color="#0A2540"
+              />
+            </FadeInView>
+            <FadeInView delay={300}>
+              <StatCard
+                title="Administrators"
+                value={stats.admins}
+                icon="shield"
+                color="#007AFF"
+              />
+            </FadeInView>
+            <FadeInView delay={400}>
+              <StatCard
+                title="Managers"
+                value={stats.managers}
+                icon="briefcase"
+                color="#0A2540"
+              />
+            </FadeInView>
+            <FadeInView delay={500}>
+              <StatCard
+                title="Members"
+                value={stats.users}
+                icon="account-multiple-outline"
+                color="#007AFF"
+              />
+            </FadeInView>
+            <FadeInView delay={600}>
+              <StatCard
+                title="Total Tasks"
+                value={stats.totalTasks}
+                icon="checkbox-multiple-marked"
+                color="#0A2540"
+              />
+            </FadeInView>
+            <FadeInView delay={700}>
+              <StatCard
+                title="Total Teams"
+                value={stats.totalTeams}
+                icon="account-group"
+                color="#007AFF"
+              />
+            </FadeInView>
           </View>
         )}
 
         {/* Users Tab */}
         {activeTab === "users" && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>All Users</Text>
+            <FadeInView delay={100}>
+              <Text style={styles.sectionTitle}>All Users</Text>
+            </FadeInView>
             {users.length > 0 ? (
-              users.map((user) => (
-                <UserListItem
-                  key={user.id}
-                  id={user.id}
-                  name={user.name}
-                  email={user.email}
-                  role={user.role}
-                  onDelete={() => handleDeleteUser(user.id, user.name)}
-                />
+              users.map((user, index) => (
+                <FadeInView key={user.id} delay={150 + index * 50}>
+                  <UserListItem
+                    id={user.id}
+                    name={user.name}
+                    email={user.email}
+                    role={user.role}
+                    onDelete={() => handleDeleteUser(user.id, user.name)}
+                  />
+                </FadeInView>
               ))
             ) : (
               <EmptyState
@@ -297,18 +315,21 @@ export default function AdminDashboardScreen() {
         {/* Tasks Tab */}
         {activeTab === "tasks" && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>All Tasks</Text>
+            <FadeInView delay={100}>
+              <Text style={styles.sectionTitle}>All Tasks</Text>
+            </FadeInView>
             {tasks.length > 0 ? (
-              tasks.map((task) => (
-                <TaskListItem
-                  key={task.id}
-                  id={task.id}
-                  title={task.title}
-                  description={task.description}
-                  status={task.status}
-                  priority={task.priority}
-                  onDelete={() => handleDeleteTask(task.id, task.title)}
-                />
+              tasks.map((task, index) => (
+                <FadeInView key={task.id} delay={150 + index * 50}>
+                  <TaskListItem
+                    id={task.id}
+                    title={task.title}
+                    description={task.description}
+                    status={task.status}
+                    priority={task.priority}
+                    onDelete={() => handleDeleteTask(task.id, task.title)}
+                  />
+                </FadeInView>
               ))
             ) : (
               <EmptyState
@@ -323,51 +344,55 @@ export default function AdminDashboardScreen() {
         {/* Teams Tab */}
         {activeTab === "teams" && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>All Teams</Text>
+            <FadeInView delay={100}>
+              <Text style={styles.sectionTitle}>All Teams</Text>
+            </FadeInView>
             {teams.length > 0 ? (
-              teams.map((team) => (
-                <View key={team.id} style={styles.teamCard}>
-                  <Text style={styles.teamName}>{team.name}</Text>
-                  {team.description && (
-                    <Text style={styles.teamDescription}>
-                      {team.description}
-                    </Text>
-                  )}
-                  <View style={styles.teamStatsContainer}>
-                    <View style={styles.teamStats}>
-                      <View style={styles.statItem}>
-                        <MaterialCommunityIcons 
-                          name="account-multiple" 
-                          size={14} 
-                          color="#666" 
-                        />
-                        <Text style={styles.statText}>
-                          {team.members?.length || 0} Members
-                        </Text>
+              teams.map((team, index) => (
+                <FadeInView key={team.id} delay={150 + index * 50}>
+                  <View style={styles.teamCard}>
+                    <Text style={styles.teamName}>{team.name}</Text>
+                    {team.description && (
+                      <Text style={styles.teamDescription}>
+                        {team.description}
+                      </Text>
+                    )}
+                    <View style={styles.teamStatsContainer}>
+                      <View style={styles.teamStats}>
+                        <View style={styles.statItem}>
+                          <MaterialCommunityIcons 
+                            name="account-multiple" 
+                            size={14} 
+                            color="#666" 
+                          />
+                          <Text style={styles.statText}>
+                            {team.members?.length || 0} Members
+                          </Text>
+                        </View>
+                        <View style={styles.statItem}>
+                          <MaterialCommunityIcons 
+                            name="checkbox-multiple-marked" 
+                            size={14} 
+                            color="#666" 
+                          />
+                          <Text style={styles.statText}>
+                            {team.tasks?.length || 0} Tasks
+                          </Text>
+                        </View>
                       </View>
-                      <View style={styles.statItem}>
-                        <MaterialCommunityIcons 
-                          name="checkbox-multiple-marked" 
-                          size={14} 
-                          color="#666" 
-                        />
-                        <Text style={styles.statText}>
-                          {team.tasks?.length || 0} Tasks
-                        </Text>
-                      </View>
+                      <TouchableOpacity
+                        style={styles.deleteButton}
+                        onPress={() => handleDeleteTeam(team.id, team.name)}
+                      >
+                        <MaterialCommunityIcons name="delete" size={20} color="#E63946" />
+                      </TouchableOpacity>
                     </View>
-                    <TouchableOpacity
-                      style={styles.deleteButton}
-                      onPress={() => handleDeleteTeam(team.id, team.name)}
-                    >
-                      <MaterialCommunityIcons name="delete" size={20} color="#f44" />
-                    </TouchableOpacity>
                   </View>
-                </View>
+                </FadeInView>
               ))
             ) : (
               <EmptyState
-                icon="briefcase-multiple"
+                icon="account-group"
                 title="No Teams"
                 message="There are no teams in the system"
               />
@@ -393,7 +418,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#f5f5f5",
   },
   header: {
-    backgroundColor: "#007AFF",
+    backgroundColor: "#0454aaff",
     paddingHorizontal: 20,
     paddingVertical: 16,
     paddingTop: 20,
@@ -428,8 +453,18 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 6,
   },
+  actionButtonSecondary: {
+    backgroundColor: "transparent",
+    borderWidth: 1,
+    borderColor: "#007AFF",
+  },
   actionButtonText: {
     color: "#fff",
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  actionButtonTextSecondary: {
+    color: "#007AFF",
     fontSize: 12,
     fontWeight: "600",
   },
@@ -450,8 +485,13 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 12,
     marginBottom: 8,
-    borderWidth: 1,
-    borderColor: "#eee",
+    borderLeftWidth: 4,
+    borderLeftColor: "#0A2540",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
   },
   teamName: {
     fontSize: 14,
