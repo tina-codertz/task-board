@@ -6,7 +6,7 @@ export default function ManagerLayout() {
     <Stack
       screenOptions={{
         headerShown: false,
-        animationEnabled: true,
+        animation: "default",
       }}
     >
       <Stack.Screen name="dashboard" options={{ title: "Manager Dashboard" }} />

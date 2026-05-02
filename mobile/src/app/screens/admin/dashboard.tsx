@@ -51,6 +51,8 @@ interface Team {
   id: number;
   name: string;
   description?: string;
+  members?: any[];
+  tasks?: any[];
 }
 
 export default function AdminDashboardScreen() {

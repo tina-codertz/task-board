@@ -47,7 +47,7 @@ export default function BottomTabBar({
               ]}
             >
               <MaterialCommunityIcons
-                name={tab.icon}
+                name={tab.icon as any}
                 size={24}
                 color={isActive ? color : "#8e8e93"}
               />

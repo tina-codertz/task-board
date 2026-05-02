@@ -272,7 +272,7 @@ export default function TaskDetailScreen() {
                       {new Date(comment.createdAt).toLocaleDateString()}
                     </Text>
                   </View>
-                  {comment.userId === user?.id && (
+                  {comment.userId.toString() === user?.id?.toString() && (
                     <View style={styles.commentActions}>
                       <TouchableOpacity
                         onPress={() => {

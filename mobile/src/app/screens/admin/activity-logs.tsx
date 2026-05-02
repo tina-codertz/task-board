@@ -57,7 +57,7 @@ export default function ActivityLogsScreen() {
     if (action.includes("LOGIN")) return "login";
     if (action.includes("REGISTER")) return "account-plus";
     if (action.includes("TASK")) return "check-circle";
-    if (action.includes("TEAM")) return "people";
+    if (action.includes("TEAM")) return "account-group";
     if (action.includes("USER")) return "account";
     return "information";
   };

@@ -6,7 +6,7 @@ export default function MemberLayout() {
     <Stack
       screenOptions={{
         headerShown: false,
-        animationEnabled: true,
+        animation: "default",
       }}
     >
       <Stack.Screen name="dashboard" options={{ title: "Dashboard" }} />
