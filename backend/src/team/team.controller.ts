@@ -1,7 +1,16 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, UseGuards, Request } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Body,
+  Param,
+  UseGuards,
+  Request,
+} from '@nestjs/common';
 import { TeamService } from './team.service.js';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
-
 
 @Controller('teams')
 export class TeamController {
@@ -33,8 +42,16 @@ export class TeamController {
 
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
-  async updateTeam(@Param('id') id: string, @Request() req: any, @Body() updateTeamDto: any) {
-    return await this.teamService.updateTeam(parseInt(id), req.user.userId, updateTeamDto);
+  async updateTeam(
+    @Param('id') id: string,
+    @Request() req: any,
+    @Body() updateTeamDto: any,
+  ) {
+    return await this.teamService.updateTeam(
+      parseInt(id),
+      req.user.userId,
+      updateTeamDto,
+    );
   }
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
@@ -44,15 +61,29 @@ export class TeamController {
 
   @UseGuards(JwtAuthGuard)
   @Delete(':id/members/:memberId')
-  async removeMember(@Param('id') id: string, @Param('memberId') memberId: string, @Request() req: any) {
-    return await this.teamService.removeMemberFromTeam(parseInt(id), req.user.userId, parseInt(memberId));
+  async removeMember(
+    @Param('id') id: string,
+    @Param('memberId') memberId: string,
+    @Request() req: any,
+  ) {
+    return await this.teamService.removeMemberFromTeam(
+      parseInt(id),
+      req.user.userId,
+      parseInt(memberId),
+    );
   }
 
   @UseGuards(JwtAuthGuard)
   @Post(':id/members')
-  async addMember(@Param('id') id: string, @Request() req: any, @Body() body: any) {
-    return await this.teamService.addMemberToTeam(parseInt(id), req.user.userId, body.memberId);
+  async addMember(
+    @Param('id') id: string,
+    @Request() req: any,
+    @Body() body: any,
+  ) {
+    return await this.teamService.addMemberToTeam(
+      parseInt(id),
+      req.user.userId,
+      body.memberId,
+    );
   }
-
-
 }

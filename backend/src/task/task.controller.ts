@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, UseGuards, Request } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Body,
+  Param,
+  UseGuards,
+  Request,
+} from '@nestjs/common';
 import { TaskService } from './task.service.js';
 import { CommentService } from '../comments/comment.service.js';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
@@ -19,13 +29,17 @@ export class TaskController {
   @UseGuards(JwtAuthGuard)
   @Get('created')
   async getCreatedTasks(@Request() req: any) {
-    return { tasks: await this.taskService.getTasksCreatedByMe(req.user.userId) };
+    return {
+      tasks: await this.taskService.getTasksCreatedByMe(req.user.userId),
+    };
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('assigned')
   async getAssignedTasks(@Request() req: any) {
-    return { tasks: await this.taskService.getTasksAssignedToMe(req.user.userId) };
+    return {
+      tasks: await this.taskService.getTasksAssignedToMe(req.user.userId),
+    };
   }
 
   @UseGuards(JwtAuthGuard)
@@ -48,8 +62,16 @@ export class TaskController {
 
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
-  async updateTask(@Param('id') id: string, @Request() req: any, @Body() updateTaskDto: any) {
-    return await this.taskService.updateTask(parseInt(id), req.user.userId, updateTaskDto);
+  async updateTask(
+    @Param('id') id: string,
+    @Request() req: any,
+    @Body() updateTaskDto: any,
+  ) {
+    return await this.taskService.updateTask(
+      parseInt(id),
+      req.user.userId,
+      updateTaskDto,
+    );
   }
 
   @UseGuards(JwtAuthGuard)
@@ -59,7 +81,11 @@ export class TaskController {
     @Request() req: any,
     @Body() statusDto: any,
   ) {
-    return await this.taskService.updateTaskStatus(parseInt(id), req.user.userId, statusDto.status);
+    return await this.taskService.updateTaskStatus(
+      parseInt(id),
+      req.user.userId,
+      statusDto.status,
+    );
   }
 
   @UseGuards(JwtAuthGuard)
@@ -76,12 +102,18 @@ export class TaskController {
     @Request() req: any,
     @Body() body: any,
   ) {
-    return await this.commentService.createComment(parseInt(taskId), req.user.userId, body.content);
+    return await this.commentService.createComment(
+      parseInt(taskId),
+      req.user.userId,
+      body.content,
+    );
   }
 
   @UseGuards(JwtAuthGuard)
   @Get(':taskId/comments')
   async getComments(@Param('taskId') taskId: string) {
-    return { comments: await this.commentService.getTaskComments(parseInt(taskId)) };
+    return {
+      comments: await this.commentService.getTaskComments(parseInt(taskId)),
+    };
   }
 }

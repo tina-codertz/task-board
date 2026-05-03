@@ -5,7 +5,10 @@ import { Pool } from 'pg';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
-export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
+export class PrismaService
+  extends PrismaClient
+  implements OnModuleInit, OnModuleDestroy
+{
   private pool: Pool;
 
   constructor() {
@@ -20,21 +23,20 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
       password: decodeURIComponent(url.password) || 'password', // decode in case of special chars
     });
 
-    const adapter = new PrismaPg(pool); 
+    const adapter = new PrismaPg(pool);
 
     super({ adapter });
 
     this.pool = pool;
   }
 
-
   async onModuleInit() {
-  await this.$connect();
-  console.log('database is connected');
-  console.log('DATABASE_URL:', process.env.DATABASE_URL);
+    await this.$connect();
+    console.log('database is connected');
+    console.log('DATABASE_URL:', process.env.DATABASE_URL);
 
-  await this.createAdminIfNotExists();
-}
+    await this.createAdminIfNotExists();
+  }
   private async createAdminIfNotExists() {
     try {
       const email = 'admin1234@gmail.com';
@@ -62,13 +64,11 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
       console.log('Admin created:', admin.email);
     } catch (error) {
       console.error('Error creating admin:', error);
-    }}
-  
+    }
+  }
 
   async onModuleDestroy() {
     await this.$disconnect();
     await this.pool.end();
   }
-  
-  
 }

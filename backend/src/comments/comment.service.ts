@@ -1,8 +1,13 @@
-import { Injectable, ForbiddenException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  ForbiddenException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 
 @Injectable()
-export class CommentService {//this class can be injected across the nest app
+export class CommentService {
+  //this class can be injected across the nest app
   constructor(private prisma: PrismaService) {}
 
   async createComment(taskId: number, userId: number, content: string) {
@@ -57,7 +62,9 @@ export class CommentService {//this class can be injected across the nest app
   async deleteComment(commentId: number, userId: number) {
     const prisma = this.prisma as any;
 
-    const comment = await prisma.comment.findUnique({ where: { id: commentId } });
+    const comment = await prisma.comment.findUnique({
+      where: { id: commentId },
+    });
     if (!comment) throw new BadRequestException('Comment not found');
 
     const user = await prisma.user.findUnique({ where: { id: userId } });
@@ -65,7 +72,9 @@ export class CommentService {//this class can be injected across the nest app
       throw new ForbiddenException('You can only delete your own comments');
     }
 
-    const task = await prisma.task.findUnique({ where: { id: comment.taskId } });
+    const task = await prisma.task.findUnique({
+      where: { id: comment.taskId },
+    });
     await prisma.comment.delete({ where: { id: commentId } });
 
     // Log comment deletion
@@ -85,7 +94,9 @@ export class CommentService {//this class can be injected across the nest app
   async updateComment(commentId: number, userId: number, content: string) {
     const prisma = this.prisma as any;
 
-    const comment = await prisma.comment.findUnique({ where: { id: commentId } });
+    const comment = await prisma.comment.findUnique({
+      where: { id: commentId },
+    });
     if (!comment) throw new BadRequestException('Comment not found');
 
     if (comment.userId !== userId) {

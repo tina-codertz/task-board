@@ -4,7 +4,6 @@ import helmet from 'helmet';
 
 import { AppModule } from './app.module.js';
 
-
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
@@ -12,8 +11,6 @@ async function bootstrap() {
   app.use(helmet());
 
   app.setGlobalPrefix('api');
-
-
 
   //  GLOBAL VALIDATION PIPE
   app.useGlobalPipes(
@@ -28,9 +25,11 @@ async function bootstrap() {
   );
 
   //  CORS
-  const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:5173,http://localhost:8000')
+  const allowedOrigins = (
+    process.env.ALLOWED_ORIGINS || 'http://localhost:5173,http://localhost:8000'
+  )
     .split(',')
-    .map(origin => origin.trim());
+    .map((origin) => origin.trim());
 
   app.enableCors({
     origin: allowedOrigins,

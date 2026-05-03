@@ -1,4 +1,8 @@
-import { Injectable, ForbiddenException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  ForbiddenException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 
 @Injectable()
@@ -21,7 +25,9 @@ export class TeamService {
       },
       include: {
         owner: { select: { id: true, name: true, email: true } },
-        members: { include: { user: { select: { id: true, name: true, email: true } } } },
+        members: {
+          include: { user: { select: { id: true, name: true, email: true } } },
+        },
       },
     });
 
@@ -44,7 +50,9 @@ export class TeamService {
     const teams = await prisma.team.findMany({
       include: {
         owner: { select: { id: true, name: true, email: true } },
-        members: { include: { user: { select: { id: true, name: true, email: true } } } },
+        members: {
+          include: { user: { select: { id: true, name: true, email: true } } },
+        },
         tasks: { select: { id: true, status: true } },
       },
       orderBy: { createdAt: 'desc' },
@@ -60,7 +68,9 @@ export class TeamService {
       where: { id: teamId },
       include: {
         owner: { select: { id: true, name: true, email: true } },
-        members: { include: { user: { select: { id: true, name: true, email: true } } } },
+        members: {
+          include: { user: { select: { id: true, name: true, email: true } } },
+        },
         tasks: {
           include: {
             assignedTo: { select: { id: true, name: true } },
@@ -92,7 +102,9 @@ export class TeamService {
       },
       include: {
         owner: { select: { id: true, name: true, email: true } },
-        members: { include: { user: { select: { id: true, name: true, email: true } } } },
+        members: {
+          include: { user: { select: { id: true, name: true, email: true } } },
+        },
       },
     });
 
@@ -139,7 +151,8 @@ export class TeamService {
       where: { teamId_userId: { teamId, userId: newMemberId } },
     });
 
-    if (existing) throw new BadRequestException('User is already a team member');
+    if (existing)
+      throw new BadRequestException('User is already a team member');
 
     const teamMember = await prisma.teamMember.create({
       data: { teamId, userId: newMemberId },
@@ -164,21 +177,22 @@ export class TeamService {
     const prisma = this.prisma as any;
 
     // Validate inputs
-    
 
     const team = await prisma.team.findUnique({ where: { id: teamId } });
     const user = await prisma.user.findUnique({ where: { id: userId } });
 
     if (team.ownerId !== userId && user.role !== 'ADMIN') {
-      throw new ForbiddenException('Only team owner or admin can remove members');
+      throw new ForbiddenException(
+        'Only team owner or admin can remove members',
+      );
     }
 
     await prisma.teamMember.delete({
-      where: { 
-        teamId_userId: { 
-          teamId: teamId, 
-          userId: memberId 
-        } 
+      where: {
+        teamId_userId: {
+          teamId: teamId,
+          userId: memberId,
+        },
       },
     });
     console.log(`Removed user ${memberId} from team ${teamId}`);
@@ -204,7 +218,9 @@ export class TeamService {
       where: { ownerId: userId },
       include: {
         owner: { select: { id: true, name: true, email: true } },
-        members: { include: { user: { select: { id: true, name: true, email: true } } } },
+        members: {
+          include: { user: { select: { id: true, name: true, email: true } } },
+        },
         tasks: { select: { id: true } },
       },
     });
@@ -217,15 +233,14 @@ export class TeamService {
 
     const teams = await prisma.team.findMany({
       where: {
-        OR: [
-          { ownerId: userId },
-          { members: { some: { userId } } },
-        ],
+        OR: [{ ownerId: userId }, { members: { some: { userId } } }],
       },
       include: {
         owner: { select: { id: true, name: true, email: true } },
-        members: { include: { user: { select: { id: true, name: true, email: true } } } },
-        tasks: { 
+        members: {
+          include: { user: { select: { id: true, name: true, email: true } } },
+        },
+        tasks: {
           include: {
             assignedTo: { select: { id: true, name: true } },
             createdBy: { select: { id: true, name: true } },

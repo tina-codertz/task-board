@@ -4,7 +4,8 @@ import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service.js';
 
 @Injectable()
-export class AuthService { //services class so it can be injected in the controller
+export class AuthService {
+  //services class so it can be injected in the controller
   constructor(
     private prisma: PrismaService,
     private jwt: JwtService,
@@ -32,9 +33,7 @@ export class AuthService { //services class so it can be injected in the control
         },
       });
     } catch (error) {
-        
       // Silently fail logging - don't interrupt auth flow
-      
     }
   }
   async register(dto: any) {
@@ -63,8 +62,7 @@ export class AuthService { //services class so it can be injected in the control
           },
         },
       });
-    } catch (error) {
-    }
+    } catch (error) {}
 
     return this.signToken(user);
   }
@@ -78,7 +76,7 @@ export class AuthService { //services class so it can be injected in the control
       });
 
       if (!user) {
-        console.log("[LOGIN FAILED] User not found");
+        console.log('[LOGIN FAILED] User not found');
         // Log failed login attempt (user not found)
         try {
           await prisma.activityLog.create({
@@ -100,10 +98,10 @@ export class AuthService { //services class so it can be injected in the control
       }
 
       const valid = await bcrypt.compare(dto.password, user.password);
-      console.log("[LOGIN] Password comparison result", valid);
+      console.log('[LOGIN] Password comparison result', valid);
 
       if (!valid) {
-        console.log("[LOGIN FAILED] Invalid password for user failed" )
+        console.log('[LOGIN FAILED] Invalid password for user failed');
         // Log failed password attempt
         await this.logAuthActivity(user.id, 'LOGIN_FAILED', false, {
           reason: 'invalid_password',
@@ -113,7 +111,7 @@ export class AuthService { //services class so it can be injected in the control
       }
 
       // Login successful - log it
-      console.log("[LOGIN SUCCESS] User logged in");
+      console.log('[LOGIN SUCCESS] User logged in');
       await this.logAuthActivity(user.id, 'LOGIN_SUCCESS', true, {
         email: user.email,
         role: user.role,
@@ -197,7 +195,7 @@ export class AuthService { //services class so it can be injected in the control
   }
 
   async getAllUsers() {
-    const prisma = this.prisma as any; 
+    const prisma = this.prisma as any;
     const users = await prisma.user.findMany({
       select: {
         id: true,

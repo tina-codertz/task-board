@@ -1,4 +1,8 @@
-import { Injectable, ForbiddenException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  ForbiddenException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 
 @Injectable()
@@ -7,7 +11,7 @@ export class TaskService {
 
   async createTask(userId: number, createTaskDto: any) {
     const prisma = this.prisma as any;
-    
+
     // Get user to check role
     const user = await prisma.user.findUnique({ where: { id: userId } });
     if (user.role !== 'MANAGER' && user.role !== 'ADMIN') {
@@ -164,7 +168,11 @@ export class TaskService {
 
     // Only assignee, creator, or admin can update status
     const user = await prisma.user.findUnique({ where: { id: userId } });
-    if (task.assignedToId !== userId && task.createdById !== userId && user.role !== 'ADMIN') {
+    if (
+      task.assignedToId !== userId &&
+      task.createdById !== userId &&
+      user.role !== 'ADMIN'
+    ) {
       throw new ForbiddenException('You cannot update this task status');
     }
 
@@ -179,7 +187,8 @@ export class TaskService {
     });
 
     // Log status change
-    const action = newStatus === 'DONE' ? 'TASK_COMPLETED' : 'TASK_STATUS_CHANGED';
+    const action =
+      newStatus === 'DONE' ? 'TASK_COMPLETED' : 'TASK_STATUS_CHANGED';
     await prisma.activityLog.create({
       data: {
         action,

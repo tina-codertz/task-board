@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, UseGuards, ForbiddenException, Request } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Body,
+  Param,
+  UseGuards,
+  ForbiddenException,
+  Request,
+} from '@nestjs/common';
 import { AdminService } from './admin.service.js';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -40,7 +51,10 @@ export class AdminController {
     @Body() body: any,
   ) {
     await this.checkAdmin(req.user.userId);
-    const user = await this.adminService.updateUserRole(parseInt(id), body.role);
+    const user = await this.adminService.updateUserRole(
+      parseInt(id),
+      body.role,
+    );
     return { user };
   }
 

@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Delete, Body, Param, UseGuards, Request, Patch } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Delete,
+  Body,
+  Param,
+  UseGuards,
+  Request,
+  Patch,
+} from '@nestjs/common';
 import { CommentService } from './comment.service.js';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 
@@ -13,19 +23,34 @@ export class CommentController {
     @Request() req: any,
     @Body() body: any,
   ) {
-    return await this.commentService.createComment(parseInt(taskId), req.user.userId, body.content);
+    return await this.commentService.createComment(
+      parseInt(taskId),
+      req.user.userId,
+      body.content,
+    );
   }
 
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
   async deleteComment(@Param('id') id: string, @Request() req: any) {
-    return await this.commentService.deleteComment(parseInt(id), req.user.userId);
+    return await this.commentService.deleteComment(
+      parseInt(id),
+      req.user.userId,
+    );
   }
 
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
-  async updateComment(@Param('id') id: string, @Request() req: any, @Body() body: any) {
-    return await this.commentService.updateComment(parseInt(id), req.user.userId, body.content);
+  async updateComment(
+    @Param('id') id: string,
+    @Request() req: any,
+    @Body() body: any,
+  ) {
+    return await this.commentService.updateComment(
+      parseInt(id),
+      req.user.userId,
+      body.content,
+    );
   }
 }
 
