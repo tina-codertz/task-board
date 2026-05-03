@@ -13,7 +13,8 @@ RUN npm install
 # copy source code
 COPY . .
 
-# build the app
+RUN npx prisma generate
+RUN npx prisma migrate deploy
 RUN npm run build
 
 # expose the port the app runs on
