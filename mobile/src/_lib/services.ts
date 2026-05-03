@@ -1,6 +1,6 @@
 import { getToken } from "./api";
 
-const API_BASE_URL = "http://192.168.1.8:8000/api";
+const API_BASE_URL = "https://task-board-1-hd8l.onrender.com/api";
 
 // Helper function to make authenticated requests
 async function authenticatedFetch(endpoint: string, options: RequestInit = {}) {

@@ -9,7 +9,7 @@ export default defineConfig({
   ],
   server: {
     proxy: {
-      '/api': 'http://localhost:3002',
+      '/api': 'https://task-board-1-hd8l.onrender.com/api',
     },
   },
 })
