@@ -1,10 +1,9 @@
 # Task Board Mobile App
 
-Welcome to the **Task Board Mobile App**! This document provides a comprehensive overview of the mobile application's architecture, components, navigation flow, and logic. It is written to be easily understandable for a beginner in Expo, while providing enough depth to present the project confidently to a technical panel.
-
+ **Task Board Mobile App**! This document provides a comprehensive overview of the mobile application's architecture, components, navigation flow, and logic. 
 ---
 
-## 📱 Project Overview
+## Project Overview
 
 This is a mobile application built using **React Native** and **Expo**. It serves as the frontend for a Task Board system, allowing users to log in, view, and manage tasks depending on their roles. 
 
@@ -17,7 +16,7 @@ This is a mobile application built using **React Native** and **Expo**. It serve
 
 ---
 
-## 🏗️ Architecture & Folder Structure
+##  Architecture & Folder Structure
 
 The app's source code is contained entirely inside the `src/` folder. Here's how it's structured to maintain clean and scalable code:
 
@@ -36,7 +35,7 @@ By separating the API logic (`_lib`), global state (`_context`), UI pieces (`com
 
 ---
 
-## 🧭 Navigation & Data Flow (Expo Router)
+##  Navigation & Data Flow (Expo Router)
 
 The app uses **Expo Router** which maps the folder structure directly to navigation routes.
 
@@ -53,7 +52,7 @@ This ensures that users can never access screens they don't have permission to s
 
 ---
 
-## 🖥️ Screens by Role
+##  Screens by Role
 
 ### 1. Admin (`app/screens/admin/`)
 * **Dashboard**: Overview of system statistics (total users, active teams).
@@ -73,7 +72,7 @@ This ensures that users can never access screens they don't have permission to s
 
 ---
 
-## 🧩 Reusable Components (`src/components/`)
+##  Reusable Components (`src/components/`)
 
 Instead of duplicating code across screens, the app uses a modular component system:
 * **`DashboardHeader.tsx`**: A consistent top navigation bar across all dashboards.
@@ -85,7 +84,7 @@ Instead of duplicating code across screens, the app uses a modular component sys
 
 ---
 
-## 🧠 State Management & Context (`_context/`)
+##  State Management & Context (`_context/`)
 
 The application uses the **React Context API** (`AuthContext.tsx`) to handle authentication state globally.
 
@@ -99,7 +98,7 @@ This prevents "prop drilling" (passing data down through multiple layers of comp
 
 ---
 
-## 🔌 API & Backend Communication (`_lib/`)
+##  API & Backend Communication (`_lib/`)
 
 The mobile app communicates with the backend via the logic defined in `services.ts` and `api.ts`.
 
@@ -120,7 +119,7 @@ This makes calling the backend inside a component as simple as: `await taskAPI.g
 
 ---
 
-## 🚀 How to Run the Project Locally
+##  How to Run the Project Locally
 
 1. **Install Dependencies**: Make sure you are inside the `/mobile` directory and run:
    ```bash
@@ -137,6 +136,6 @@ This makes calling the backend inside a component as simple as: `await taskAPI.g
 
 ---
 
-## 🎯 Summary for the Panel
-If asked to summarize your understanding, you can say:
+##  Summary 
+
 > *"This mobile app is a secure, role-based Task Management client built with React Native and Expo Router. It maintains clean separation of concerns by isolating API calls to a services layer, using Context API for global authentication state, and relying on a modular component architecture. The navigation intelligently intercepts users based on their active JWT token and role, ensuring Admins, Managers, and Members only see the data and actions relevant to their permissions."*

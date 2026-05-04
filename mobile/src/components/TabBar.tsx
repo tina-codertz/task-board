@@ -9,6 +9,7 @@ interface TabBarProps {
 
 export default function TabBar({ tabs, activeTab, onTabChange }: TabBarProps) {
   return (
+    
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}

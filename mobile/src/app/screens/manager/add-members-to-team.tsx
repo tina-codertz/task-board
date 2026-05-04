@@ -9,7 +9,7 @@ import {
   ActivityIndicator,
   FlatList,
 } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { teamAPI, authAPI } from "../../../_lib/services";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -120,6 +120,7 @@ export default function AddMembersToTeamScreen() {
   }
 
   return (
+    <SafeAreaView edges={["bottom"]} style={{ backgroundColor: "#fff" }}>
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <ScrollView style={styles.content}>
         <View style={styles.header}>
@@ -228,6 +229,7 @@ export default function AddMembersToTeamScreen() {
         </TouchableOpacity>
       </View>
     </View>
+    </SafeAreaView>
   );
 }
 
