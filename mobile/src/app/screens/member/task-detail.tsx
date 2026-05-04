@@ -12,7 +12,10 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useAuth } from "../../../_context/AuthContext";
 import { taskAPI } from "../../../_lib/services";
@@ -48,7 +51,7 @@ export default function TaskDetailScreen() {
   const { user } = useAuth();
   const { taskId } = useLocalSearchParams();
   const insets = useSafeAreaInsets();
-  
+
   const [task, setTask] = useState<Task | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState("");
@@ -90,7 +93,10 @@ export default function TaskDetailScreen() {
 
     try {
       setPosting(true);
-      const result = await taskAPI.addComment(parseInt(taskId as string), newComment.trim());
+      const result = await taskAPI.addComment(
+        parseInt(taskId as string),
+        newComment.trim(),
+      );
       setComments([...comments, result]);
       setNewComment("");
     } catch (err: any) {
@@ -110,7 +116,9 @@ export default function TaskDetailScreen() {
       setPosting(true);
       const result = await taskAPI.updateComment(commentId, editText.trim());
       setComments(
-        comments.map((c) => (c.id === commentId ? { ...c, content: result.content } : c))
+        comments.map((c) =>
+          c.id === commentId ? { ...c, content: result.content } : c,
+        ),
       );
       setEditingId(null);
       setEditText("");
@@ -122,21 +130,25 @@ export default function TaskDetailScreen() {
   };
 
   const handleDeleteComment = (commentId: number) => {
-    Alert.alert("Delete Comment", "Are you sure you want to delete this comment?", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Delete",
-        style: "destructive",
-        onPress: async () => {
-          try {
-            await taskAPI.deleteComment(commentId);
-            setComments(comments.filter((c) => c.id !== commentId));
-          } catch (err: any) {
-            Alert.alert("Error", err?.message || "Failed to delete comment");
-          }
+    Alert.alert(
+      "Delete Comment",
+      "Are you sure you want to delete this comment?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await taskAPI.deleteComment(commentId);
+              setComments(comments.filter((c) => c.id !== commentId));
+            } catch (err: any) {
+              Alert.alert("Error", err?.message || "Failed to delete comment");
+            }
+          },
         },
-      },
-    ]);
+      ],
+    );
   };
 
   const handleUpdateStatus = async () => {
@@ -151,7 +163,10 @@ export default function TaskDetailScreen() {
       setUpdating(true);
       await taskAPI.updateTaskStatus(parseInt(taskId as string), nextStatus);
       setCurrentStatus(nextStatus);
-      const message = nextStatus === "DONE" ? "Task marked as completed!" : "Task status updated!";
+      const message =
+        nextStatus === "DONE"
+          ? "Task marked as completed!"
+          : "Task status updated!";
       Alert.alert("Success", message);
     } catch (err: any) {
       Alert.alert("Error", err?.message || "Failed to update task status");
@@ -208,16 +223,23 @@ export default function TaskDetailScreen() {
         <Text style={styles.headerTitle}>Task Details</Text>
         <View style={{ width: 24 }} />
       </View>
-
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Task Info */}
         <View style={styles.taskCard}>
           <View style={styles.taskHeader}>
             <Text style={styles.taskTitle}>{task.title}</Text>
             <View
-              style={[styles.statusBadge, { backgroundColor: getStatusColor(currentStatus) + "20" }]}
+              style={[
+                styles.statusBadge,
+                { backgroundColor: getStatusColor(currentStatus) + "20" },
+              ]}
             >
-              <Text style={[styles.statusText, { color: getStatusColor(currentStatus) }]}>
+              <Text
+                style={[
+                  styles.statusText,
+                  { color: getStatusColor(currentStatus) },
+                ]}
+              >
                 {currentStatus}
               </Text>
             </View>
@@ -230,7 +252,9 @@ export default function TaskDetailScreen() {
           <View style={styles.infoSection}>
             <View style={styles.infoRow}>
               <MaterialCommunityIcons name="account" size={16} color="#666" />
-              <Text style={styles.infoText}>Created by: {task.createdBy.name}</Text>
+              <Text style={styles.infoText}>
+                Created by: {task.createdBy.name}
+              </Text>
             </View>
             <View style={styles.infoRow}>
               <MaterialCommunityIcons name="flag" size={16} color="#666" />
@@ -253,7 +277,9 @@ export default function TaskDetailScreen() {
                   color="#fff"
                 />
                 <Text style={styles.completeButtonText}>
-                  {currentStatus === "DONE" ? "Task Completed" : "Mark Complete"}
+                  {currentStatus === "DONE"
+                    ? "Task Completed"
+                    : "Mark Complete"}
                 </Text>
               </>
             )}
@@ -269,7 +295,9 @@ export default function TaskDetailScreen() {
               <View key={comment.id} style={styles.commentCard}>
                 <View style={styles.commentHeader}>
                   <View style={styles.commentUserInfo}>
-                    <Text style={styles.commentAuthor}>{comment.user.name}</Text>
+                    <Text style={styles.commentAuthor}>
+                      {comment.user.name}
+                    </Text>
                     <Text style={styles.commentDate}>
                       {new Date(comment.createdAt).toLocaleDateString()}
                     </Text>
@@ -282,13 +310,21 @@ export default function TaskDetailScreen() {
                           setEditText(comment.content);
                         }}
                       >
-                        <MaterialCommunityIcons name="pencil" size={18} color="#FF9800" />
+                        <MaterialCommunityIcons
+                          name="pencil"
+                          size={18}
+                          color="#FF9800"
+                        />
                       </TouchableOpacity>
                       <TouchableOpacity
                         onPress={() => handleDeleteComment(comment.id)}
                         style={{ marginLeft: 12 }}
                       >
-                        <MaterialCommunityIcons name="trash-can" size={18} color="#f44" />
+                        <MaterialCommunityIcons
+                          name="trash-can"
+                          size={18}
+                          color="#f44"
+                        />
                       </TouchableOpacity>
                     </View>
                   )}
@@ -333,37 +369,59 @@ export default function TaskDetailScreen() {
             ))
           ) : (
             <View style={styles.noCommentsContainer}>
-              <MaterialCommunityIcons name="comment-outline" size={40} color="#ccc" />
+              <MaterialCommunityIcons
+                name="comment-outline"
+                size={40}
+                color="#ccc"
+              />
               <Text style={styles.noCommentsText}>No comments yet</Text>
             </View>
           )}
         </View>
       </ScrollView>
-
       {/* Add Comment Input */}
-      <View style={[styles.inputSection, { paddingBottom: Math.max(insets.bottom, 12) }]}>
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={styles.input}
-            placeholder="Add a comment..."
-            multiline
-            value={newComment}
-            onChangeText={setNewComment}
-            maxLength={500}
-          />
-          <TouchableOpacity
-            style={[styles.sendButton, !newComment.trim() && styles.sendButtonDisabled]}
-            onPress={handleAddComment}
-            disabled={posting || !newComment.trim()}
+      return (
+      <SafeAreaView style={{ flex: 1 }}>
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
+        >
+          {/* YOUR MAIN CONTENT */}
+          <View style={{ flex: 1 }} />
+
+          {/* INPUT BAR */}
+          <View
+            style={[
+              styles.inputSection,
+              {
+                paddingBottom: Math.max(insets.bottom, 12),
+              },
+            ]}
           >
-            {posting ? (
-              <ActivityIndicator color="#fff" size="small" />
-            ) : (
-              <MaterialCommunityIcons name="send" size={20} color="#fff" />
-            )}
-          </TouchableOpacity>
-        </View>
-      </View>
+            <View style={styles.inputContainer}>
+              <TextInput
+                style={styles.input}
+                placeholder="Add a comment..."
+                multiline
+                value={newComment}
+                onChangeText={setNewComment}
+              />
+
+              <TouchableOpacity
+                style={[
+                  styles.sendButton,
+                  !newComment.trim() && styles.sendButtonDisabled,
+                ]}
+                onPress={handleAddComment}
+                disabled={!newComment.trim()}
+              >
+                <MaterialCommunityIcons name="send" size={20} color="#fff" />
+              </TouchableOpacity>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+      );
     </KeyboardAvoidingView>
   );
 }

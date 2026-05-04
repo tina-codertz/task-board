@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { ActivityIndicator, StatusBar, View } from "react-native";
+import { ActivityIndicator, SafeAreaViewBase, StatusBar, View } from "react-native";
 import { Stack } from "expo-router";
 import { useRouter, useSegments } from "expo-router";
 import { AuthProvider, useAuth } from "../_context/AuthContext";
@@ -55,5 +55,6 @@ export default function RootLayout() {
     <AuthProvider>
       <RootLayoutNav />
     </AuthProvider></>
+   
   );
 }
