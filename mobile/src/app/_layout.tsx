@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { ActivityIndicator, View } from "react-native";
+import { ActivityIndicator, StatusBar, View } from "react-native";
 import { Stack } from "expo-router";
 import { useRouter, useSegments } from "expo-router";
 import { AuthProvider, useAuth } from "../_context/AuthContext";
@@ -50,8 +50,10 @@ function RootLayoutNav() {
 
 export default function RootLayout() {
   return (
+    <>
+    <StatusBar barStyle="light-content" />
     <AuthProvider>
       <RootLayoutNav />
-    </AuthProvider>
+    </AuthProvider></>
   );
 }

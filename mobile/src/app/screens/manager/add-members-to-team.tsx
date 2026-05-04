@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   FlatList,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { teamAPI, authAPI } from "../../../_lib/services";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -22,6 +23,7 @@ interface Member {
 
 export default function AddMembersToTeamScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { teamId, teamName } = useLocalSearchParams();
   const [members, setMembers] = useState<Member[]>([]);
   const [selectedMembers, setSelectedMembers] = useState<number[]>([]);
@@ -108,7 +110,7 @@ export default function AddMembersToTeamScreen() {
 
   if (fetchingData) {
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#FF9800" />
           <Text style={styles.loadingText}>Loading members...</Text>
@@ -118,7 +120,7 @@ export default function AddMembersToTeamScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
       <ScrollView style={styles.content}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()}>
@@ -199,7 +201,7 @@ export default function AddMembersToTeamScreen() {
         </View>
       </ScrollView>
 
-      <View style={styles.footer}>
+      <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16) }]}>
         <TouchableOpacity
           style={styles.skipButton}
           onPress={handleSkip}

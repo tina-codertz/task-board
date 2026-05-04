@@ -11,6 +11,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useAuth } from "../../../_context/AuthContext";
 import { taskAPI } from "../../../_lib/services";
@@ -52,6 +53,7 @@ export default function ManagerTaskDetailScreen() {
   const router = useRouter();
   const { user } = useAuth();
   const { taskId } = useLocalSearchParams();
+  const insets = useSafeAreaInsets();
 
   const [task, setTask] = useState<Task | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
@@ -181,7 +183,7 @@ export default function ManagerTaskDetailScreen() {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       keyboardVerticalOffset={100}
     >
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: Math.max(insets.top, 16) }]}>
         <TouchableOpacity onPress={() => router.back()}>
           <MaterialCommunityIcons name="arrow-left" size={24} color="#fff" />
         </TouchableOpacity>
@@ -312,7 +314,7 @@ export default function ManagerTaskDetailScreen() {
       </ScrollView>
 
       {/* Add Comment Input */}
-      <View style={styles.inputSection}>
+      <View style={[styles.inputSection, { paddingBottom: Math.max(insets.bottom, 12) }]}>
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.input}
@@ -350,8 +352,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 16,
-    paddingVertical: 12,
-    paddingTop: 16,
+    paddingBottom: 12,
   },
   headerTitle: {
     fontSize: 18,
@@ -541,7 +542,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: "#eee",
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingTop: 12,
   },
   inputContainer: {
     flexDirection: "row",

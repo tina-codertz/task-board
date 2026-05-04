@@ -1,4 +1,5 @@
-import { getToken } from "./api";
+import { router } from "expo-router";
+import { getToken, safeAsyncStorage } from "./api";
 
 const API_BASE_URL = "https://task-board-1-hd8l.onrender.com/api";
 
@@ -22,6 +23,12 @@ async function authenticatedFetch(endpoint: string, options: RequestInit = {}) {
   });
 
   if (response.status === 401) {
+
+    safeAsyncStorage.removeItem("token");
+    safeAsyncStorage.removeItem("user");
+
+    router.replace("/auth/AuthPage");
+
     console.error(`[API] Unauthorized response from ${endpoint}. Token: ${token ? "present" : "missing"}`);
   }
 

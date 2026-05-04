@@ -38,34 +38,37 @@ export class PrismaService
     await this.createAdminIfNotExists();
   }
   private async createAdminIfNotExists() {
-    try {
-      const email = 'admin1234@gmail.com';
+  try {
+    const email = 'admin1234@gmail.com';
+    const plainPassword = 'admin123';
+    const hashedPassword = await bcrypt.hash(plainPassword, 10);
 
-      const existingAdmin = await this.user.findUnique({
+    const existingAdmin = await this.user.findUnique({ where: { email } });
+
+    if (existingAdmin) {
+      // Force-reset password to ensure hash is valid
+      await this.user.update({
         where: { email },
+        data: { password: hashedPassword },
       });
-
-      if (existingAdmin) {
-        console.log('Admin already exists');
-        return;
-      }
-
-      const hashedPassword = await bcrypt.hash('admin123', 10);
-
-      const admin = await this.user.create({
-        data: {
-          name: 'Admin',
-          email,
-          password: hashedPassword,
-          role: 'ADMIN', // remove if not in your schema
-        },
-      });
-
-      console.log('Admin created:', admin.email);
-    } catch (error) {
-      console.error('Error creating admin:', error);
+      console.log('Admin password reset to ensure valid hash');
+      return;
     }
+
+    const admin = await this.user.create({
+      data: {
+        name: 'Admin',
+        email,
+        password: hashedPassword,
+        role: 'ADMIN',
+      },
+    });
+
+    console.log('Admin created:', admin.email);
+  } catch (error) {
+    console.error('Error creating admin:', error);
   }
+}
 
   async onModuleDestroy() {
     await this.$disconnect();

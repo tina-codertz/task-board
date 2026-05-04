@@ -3,14 +3,14 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 // For Expo Go on physical device, use your machine's local IP address
 // Find your IP: On Mac, run: ipconfig getifaddr en0
 // Replace 192.168.1.6 with your actual local IP address
-const API_BASE_URL = "https://task-board-1-hd8l.onrender.com/api" ; // Update this IP to your machine's local IP
+const API_BASE_URL = "https://task-board-1-hd8l.onrender.com/api" ; // Update this IP to your machine's local IP.this is s alive backend url
 
 // In-memory token storage for immediate access
 let memoryToken: string | null = null;
 let memoryUser: any | null = null;
 
 // Safe AsyncStorage wrapper with error handling
-const safeAsyncStorage = {
+export const safeAsyncStorage = {
   async setItem(key: string, value: string) {
     try {
       if (AsyncStorage && AsyncStorage.setItem) {

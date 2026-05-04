@@ -9,12 +9,14 @@ import {
   Alert,
   ActivityIndicator,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { adminAPI } from "../../../_lib/services";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 export default function CreateUserScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -70,7 +72,7 @@ export default function CreateUserScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
       <ScrollView style={styles.content}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()}>

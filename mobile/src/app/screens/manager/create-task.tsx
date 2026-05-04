@@ -11,6 +11,7 @@ import {
   FlatList,
   Modal,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { taskAPI, teamAPI, authAPI } from "../../../_lib/services";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -30,6 +31,7 @@ interface Team {
 
 export default function CreateTaskScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState("MEDIUM");
@@ -127,7 +129,7 @@ export default function CreateTaskScreen() {
 
   if (fetchingData) {
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#FF9800" />
           <Text style={styles.loadingText}>Loading...</Text>
@@ -137,7 +139,7 @@ export default function CreateTaskScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
       <ScrollView style={styles.content}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()}>
@@ -303,7 +305,7 @@ export default function CreateTaskScreen() {
         onRequestClose={() => setShowMemberPicker(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+          <View style={[styles.modalContent, { paddingBottom: insets.bottom }]}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Select Member</Text>
               <TouchableOpacity onPress={() => setShowMemberPicker(false)}>
@@ -362,7 +364,7 @@ export default function CreateTaskScreen() {
         onRequestClose={() => setShowTeamPicker(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+          <View style={[styles.modalContent, { paddingBottom: insets.bottom }]}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Select Team</Text>
               <TouchableOpacity onPress={() => setShowTeamPicker(false)}>
